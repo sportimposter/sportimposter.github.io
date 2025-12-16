@@ -2,8 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Imposter Game</title>
+<title>Imposter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- iOS Add to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Imposter">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
@@ -18,22 +23,34 @@
 }
 
 *{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif;}
-body{margin:0;background:var(--bg);color:var(--text);text-align:center;padding:20px;}
-.hidden{display:none;}
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  text-align:center;
+  padding:20px;
+}
+.hidden{display:none}
 
 button{
-  border:none;border-radius:999px;
+  border:none;
+  border-radius:999px;
   padding:12px 22px;
-  background:#374151;color:var(--text);
-  font-weight:600;cursor:pointer;
+  background:#374151;
+  color:var(--text);
+  font-weight:600;
+  cursor:pointer;
 }
 button:hover{opacity:.9}
 
 h1{margin-bottom:6px}
 
 .controls,.names{
-  display:flex;gap:12px;justify-content:center;
-  flex-wrap:wrap;margin-bottom:16px;
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  flex-wrap:wrap;
+  margin-bottom:16px;
 }
 
 input{
@@ -66,17 +83,21 @@ input{
 .tile:hover{transform:translateY(-2px)}
 .tile.used{opacity:0;pointer-events:none}
 
-#starter,#speaker{
+#speaker{
   color:var(--accent);
   font-weight:600;
-  margin:8px 0;
+  margin:10px 0;
 }
 
 .overlay{
-  position:fixed;inset:0;
+  position:fixed;
+  inset:0;
   background:rgba(0,0,0,.8);
-  display:flex;align-items:center;justify-content:center;
-  opacity:0;pointer-events:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  opacity:0;
+  pointer-events:none;
   transition:.3s;
 }
 .overlay.show{opacity:1;pointer-events:auto}
@@ -85,7 +106,8 @@ input{
   background:var(--card);
   padding:36px 30px;
   border-radius:22px;
-  max-width:360px;width:90%;
+  max-width:360px;
+  width:90%;
   animation:flip .35s ease;
 }
 @keyframes flip{
@@ -103,7 +125,7 @@ input{
 </head>
 <body>
 
-<!-- SETUP -->
+<!-- SETUP SCREEN -->
 <div id="setup">
   <h1>🎭 Imposter</h1>
   <div class="controls">
@@ -114,7 +136,7 @@ input{
   <button onclick="startGame()">▶️ Start Game</button>
 </div>
 
-<!-- GAME -->
+<!-- GAME SCREEN -->
 <div id="game" class="hidden">
   <h1>🎭 Imposter</h1>
   <p id="speaker"></p>
@@ -145,51 +167,21 @@ input{
 </div>
 
 <script>
-/* ================= DATA ================= */
 const data={
   MLB:{
-    players:[
-      "Shohei Ohtani","Aaron Judge","Mookie Betts","Ronald Acuña Jr.",
-      "Juan Soto","Mike Trout","Freddie Freeman","Bryce Harper",
-      "Fernando Tatis Jr.","Corey Seager","Jose Altuve","Vladimir Guerrero Jr."
-    ],
-    teams:[
-      "Yankees","Red Sox","Blue Jays","Rays","Orioles",
-      "Guardians","Tigers","Royals","Twins","White Sox",
-      "Astros","Mariners","Rangers","Angels","Athletics",
-      "Braves","Mets","Phillies","Marlins","Nationals",
-      "Brewers","Cubs","Cardinals","Reds","Pirates",
-      "Dodgers","Padres","Giants","Diamondbacks","Rockies"
-    ]
+    players:["Shohei Ohtani","Aaron Judge","Mookie Betts","Ronald Acuña Jr.","Juan Soto","Mike Trout","Freddie Freeman","Bryce Harper","Fernando Tatis Jr.","Corey Seager","Jose Altuve","Vladimir Guerrero Jr."],
+    teams:["Yankees","Red Sox","Blue Jays","Rays","Orioles","Guardians","Tigers","Royals","Twins","White Sox","Astros","Mariners","Rangers","Angels","Athletics","Braves","Mets","Phillies","Marlins","Nationals","Brewers","Cubs","Cardinals","Reds","Pirates","Dodgers","Padres","Giants","Diamondbacks","Rockies"]
   },
   NFL:{
-    players:[
-      "Patrick Mahomes","Josh Allen","Joe Burrow","Lamar Jackson",
-      "Justin Jefferson","Tyreek Hill","Christian McCaffrey",
-      "Travis Kelce","Aaron Rodgers","CeeDee Lamb","Jalen Hurts"
-    ],
-    teams:[
-      "Cardinals","Falcons","Ravens","Bills","Panthers","Bears","Bengals","Browns",
-      "Cowboys","Broncos","Lions","Packers","Texans","Colts","Jaguars","Chiefs",
-      "Raiders","Chargers","Rams","Dolphins","Vikings","Patriots","Saints","Giants",
-      "Jets","Eagles","Steelers","49ers","Seahawks","Buccaneers","Titans","Commanders"
-    ]
+    players:["Patrick Mahomes","Josh Allen","Joe Burrow","Lamar Jackson","Justin Jefferson","Tyreek Hill","Christian McCaffrey","Travis Kelce","Aaron Rodgers","CeeDee Lamb","Jalen Hurts"],
+    teams:["Cardinals","Falcons","Ravens","Bills","Panthers","Bears","Bengals","Browns","Cowboys","Broncos","Lions","Packers","Texans","Colts","Jaguars","Chiefs","Raiders","Chargers","Rams","Dolphins","Vikings","Patriots","Saints","Giants","Jets","Eagles","Steelers","49ers","Seahawks","Buccaneers","Titans","Commanders"]
   },
   NBA:{
-    players:[
-      "LeBron James","Stephen Curry","Kevin Durant","Nikola Jokic",
-      "Giannis Antetokounmpo","Luka Dončić","Jayson Tatum","Joel Embiid"
-    ],
-    teams:[
-      "Hawks","Celtics","Nets","Hornets","Bulls","Cavaliers","Mavericks","Nuggets",
-      "Pistons","Warriors","Rockets","Pacers","Clippers","Lakers","Grizzlies","Heat",
-      "Bucks","Timberwolves","Pelicans","Knicks","Thunder","Magic","76ers","Suns",
-      "Trail Blazers","Kings","Spurs","Raptors","Jazz","Wizards"
-    ]
+    players:["LeBron James","Stephen Curry","Kevin Durant","Nikola Jokic","Giannis Antetokounmpo","Luka Dončić","Jayson Tatum","Joel Embiid"],
+    teams:["Hawks","Celtics","Nets","Hornets","Bulls","Cavaliers","Mavericks","Nuggets","Pistons","Warriors","Rockets","Pacers","Clippers","Lakers","Grizzlies","Heat","Bucks","Timberwolves","Pelicans","Knicks","Thunder","Magic","76ers","Suns","Trail Blazers","Kings","Spurs","Raptors","Jazz","Wizards"]
   }
 };
 
-/* ================= LOGIC ================= */
 let names=[],roles=[],category="",answer="",viewed=0;
 
 const rand=a=>a[Math.floor(Math.random()*a.length)];
@@ -250,7 +242,7 @@ function reveal(i){
     cardText.textContent=category;
   }else{
     cardTitle.textContent=answer;
-    cardText.textContent="Keep quiet.";
+    cardText.textContent="Stay quiet.";
   }
 }
 function closeOverlay(){overlay.classList.remove("show");}

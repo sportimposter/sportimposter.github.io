@@ -6,20 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-<circle cx='50' cy='50' r='50' fill='%23000000'/>
-<circle cx='50' cy='36' r='14' fill='%23ffffff'/>
-<path d='M30 70c0-14 40-14 40 0v6H30z' fill='%23ffffff'/>
-<rect x='24' y='30' width='52' height='8' rx='4' fill='%23000000'/>
-</svg>">
-
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
 
 :root{
---bg:#000000;
---card:#0a0a0a;
+--bg:#000;
+--card:#0b0b0b;
 --border:#1f1f1f;
 --text:#f5f5f5;
 --muted:#9ca3af;
@@ -37,10 +29,7 @@ padding:16px;
 
 .hidden{display:none}
 
-.screen{
-max-width:420px;
-margin:auto;
-}
+.screen{max-width:420px;margin:auto}
 
 .card{
 background:var(--card);
@@ -50,23 +39,14 @@ padding:22px;
 margin-top:16px;
 }
 
-h1{
-font-size:34px;
-font-weight:800;
-margin:0 0 8px;
-}
-
-h2{
-font-size:18px;
-margin-bottom:14px;
-}
+h1{font-size:34px;font-weight:800;margin:0 0 8px}
+h2{font-size:18px;margin-bottom:14px}
 
 label{
 font-size:13px;
 color:var(--muted);
 display:block;
 margin-bottom:6px;
-text-align:left;
 }
 
 input,select{
@@ -80,18 +60,12 @@ font-size:15px;
 margin-bottom:14px;
 }
 
-.row{
-display:flex;
-gap:12px;
-}
-
 button{
 width:100%;
 padding:14px;
 border-radius:16px;
 border:none;
 font-weight:700;
-font-size:15px;
 background:var(--accent);
 color:#000;
 cursor:pointer;
@@ -120,10 +94,7 @@ font-weight:700;
 cursor:pointer;
 }
 
-.tile.used{
-opacity:0;
-pointer-events:none;
-}
+.tile.used{opacity:0;pointer-events:none}
 
 .overlay{
 position:fixed;
@@ -137,10 +108,7 @@ pointer-events:none;
 transition:.25s;
 }
 
-.overlay.show{
-opacity:1;
-pointer-events:auto;
-}
+.overlay.show{opacity:1;pointer-events:auto}
 
 .modal{
 background:#000;
@@ -152,10 +120,7 @@ max-width:360px;
 text-align:center;
 }
 
-.icon{
-font-size:42px;
-margin-bottom:10px;
-}
+.icon{font-size:42px;margin-bottom:10px}
 </style>
 </head>
 
@@ -163,15 +128,13 @@ margin-bottom:10px;
 
 <div class="screen">
 
-<!-- MENU -->
 <div id="menu" class="card">
 <div class="icon">🕵️‍♂️</div>
 <h1>Imposter</h1>
 <p style="color:var(--muted)">A social deduction game</p>
-<button onclick="goSetup()">Begin</button>
+<button id="beginBtn">Begin</button>
 </div>
 
-<!-- SETUP -->
 <div id="setup" class="card hidden">
 <h2>Game Setup</h2>
 
@@ -183,7 +146,7 @@ margin-bottom:10px;
 
 <label>Category</label>
 <select id="categorySelect">
-<option value="all">All Categories</option>
+<option value="all">All</option>
 <option value="sports">Sports</option>
 <option value="animals">Animals</option>
 <option value="food">Food</option>
@@ -193,81 +156,94 @@ margin-bottom:10px;
 
 <div id="names"></div>
 
-<button onclick="startGame()">Start Game</button>
-<button class="secondary" onclick="goMenu()">Back</button>
+<button id="startBtn">Start Game</button>
+<button id="backBtn" class="secondary">Back</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="card hidden">
 <p id="speaker"></p>
 <div class="grid" id="grid"></div>
-<button id="revealBtn" class="secondary hidden" onclick="showReveal()">Reveal</button>
-<button class="secondary" onclick="newRound()">Next Round</button>
+<button id="revealBtn" class="secondary hidden">Reveal</button>
+<button id="nextBtn" class="secondary">Next Round</button>
 </div>
 
 </div>
 
-<!-- ROLE -->
-<div class="overlay" id="overlay">
+<div id="overlay" class="overlay">
 <div class="modal">
 <h2 id="roleTitle"></h2>
 <p id="roleText"></p>
-<button onclick="closeOverlay()">OK</button>
+<button id="okBtn">OK</button>
 </div>
 </div>
 
-<!-- REVEAL -->
-<div class="overlay" id="reveal">
+<div id="reveal" class="overlay">
 <div class="modal">
 <h2>Answer</h2>
 <p id="finalAnswer"></p>
-<p style="margin-top:10px"><b>Imposters</b></p>
+<p><b>Imposters</b></p>
 <p id="finalImposters"></p>
-<button onclick="closeReveal()">Done</button>
+<button id="doneBtn">Done</button>
 </div>
 </div>
 
 <script>
+/* DOM */
+const menu = document.getElementById("menu");
+const setup = document.getElementById("setup");
+const game = document.getElementById("game");
+const namesDiv = document.getElementById("names");
+const grid = document.getElementById("grid");
+const overlay = document.getElementById("overlay");
+const reveal = document.getElementById("reveal");
+const speaker = document.getElementById("speaker");
+const revealBtn = document.getElementById("revealBtn");
+
+const playerCount = document.getElementById("playerCount");
+const imposterCount = document.getElementById("imposterCount");
+const categorySelect = document.getElementById("categorySelect");
+
+const roleTitle = document.getElementById("roleTitle");
+const roleText = document.getElementById("roleText");
+const finalAnswer = document.getElementById("finalAnswer");
+const finalImposters = document.getElementById("finalImposters");
+
+/* DATA */
 const data={
-sports:[
-["LeBron James","longevity"],
-["Mahomes","sidearm"],
-["Ohtani","two-way"],
-["Yankees","pinstripes"],
-["Warriors","splash"]
-],
-animals:[
-["Dog","leash"],["Cat","whiskers"],["Lion","mane"],
-["Elephant","trunk"],["Penguin","waddle"]
-],
-food:[
-["Pizza","slice"],["Burger","stack"],["Sushi","roll"],
-["Fries","basket"],["Donut","glaze"]
-],
-locations:[
-["Library","stacks"],["Airport","gate"],["Beach","shore"],
-["Gym","rack"],["Hospital","ward"]
-],
-objects:[
-["Phone","screen"],["Keys","jingle"],
-["Clock","hands"],["Backpack","zipper"]
-]
+sports:[["LeBron James","longevity"],["Mahomes","sidearm"],["Ohtani","two-way"]],
+animals:[["Dog","leash"],["Cat","whiskers"],["Lion","mane"]],
+food:[["Pizza","slice"],["Burger","stack"],["Sushi","roll"]],
+locations:[["Library","stacks"],["Airport","gate"],["Beach","shore"]],
+objects:[["Phone","screen"],["Keys","jingle"],["Clock","hands"]]
 };
 
-let names=[],roles=[],current={},viewed=0;
+let names=[], roles=[], current={}, viewed=0;
 
-function goSetup(){
+/* FLOW */
+document.getElementById("beginBtn").onclick=()=>{
 menu.classList.add("hidden");
 setup.classList.remove("hidden");
 buildNames();
-}
+};
 
-function goMenu(){
+document.getElementById("backBtn").onclick=()=>{
 setup.classList.add("hidden");
-game.classList.add("hidden");
 menu.classList.remove("hidden");
-}
+};
 
+document.getElementById("startBtn").onclick=()=>{
+names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
+setup.classList.add("hidden");
+game.classList.remove("hidden");
+newRound();
+};
+
+document.getElementById("nextBtn").onclick=newRound;
+document.getElementById("okBtn").onclick=()=>overlay.classList.remove("show");
+document.getElementById("doneBtn").onclick=()=>reveal.classList.remove("show");
+revealBtn.onclick=showReveal;
+
+/* FUNCTIONS */
 function buildNames(){
 namesDiv.innerHTML="";
 for(let i=0;i<playerCount.value;i++){
@@ -277,23 +253,15 @@ namesDiv.appendChild(input);
 }
 }
 
-function startGame(){
-names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
-setup.classList.add("hidden");
-game.classList.remove("hidden");
-newRound();
-}
-
 function newRound(){
 viewed=0;
 revealBtn.classList.add("hidden");
 
-const pool=categorySelect.value==="all"
-?Object.values(data).flat()
-:data[categorySelect.value];
+const pool = categorySelect.value==="all"
+? Object.values(data).flat()
+: data[categorySelect.value];
 
-const pick=pool[Math.floor(Math.random()*pool.length)];
-current={answer:pick[0],hint:pick[1],category:categorySelect.options[categorySelect.selectedIndex].text};
+current = pool[Math.floor(Math.random()*pool.length)];
 
 roles=Array(names.length).fill("player");
 for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++)roles[i]="imposter";
@@ -320,16 +288,8 @@ function showRole(i){
 overlay.classList.add("show");
 if(roles[i]==="imposter"){
 roleTitle.textContent="IMPOSTER";
-roleText.textContent=`Category: ${current.category}\nHint: ${current.hint}`;
+roleText.textContent=`Category: ${categorySelect.value}\nHint: ${current[1]}`;
 }else{
-roleTitle.textContent=current.answer;
+roleTitle.textContent=current[0];
 roleText.textContent="Stay niche.";
 }
-}
-
-function closeOverlay(){overlay.classList.remove("show")}
-
-function showReveal(){
-finalAnswer.textContent=current.answer;
-final
-

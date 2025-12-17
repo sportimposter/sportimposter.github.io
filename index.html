@@ -2,101 +2,403 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Imposter Game</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Imposter">
+<meta name="theme-color" content="#6366f1">
+<title>Imposter</title>
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%236366f1'/><circle cx='90' cy='70' r='22' fill='white'/><path d='M50 125c0-28 80-28 80 0v15H50z' fill='white'/></svg>">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='50' fill='%236366f1'/><circle cx='50' cy='38' r='14' fill='white'/><path d='M28 70c0-18 44-18 44 0v8H28z' fill='white'/></svg>">
 <style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
-  --bg:#0b0b0d;
-  --card:#141417;
+  --bg:#000000;
+  --card:#0f0f12;
+  --card-light:#18181f;
   --accent:#ffffff;
-  --text:#0b0b0d;
-  --muted:#9a9aa1;
-  --imposter-bg:rgba(255,0,0,0.85);
+  --accent-glow:rgba(255,255,255,0.4);
+  --text:#ffffff;
+  --text-muted:#8b8b94;
+  --border:#27272f;
+  --success:#22c55e;
+  --danger:#ef4444;
+  --danger-glow:rgba(239,68,68,0.4);
 }
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
-body{margin:0;background:var(--bg);color:var(--text);text-align:center;}
-.screen{display:none;min-height:100vh;padding:24px;}
-.screen.active{display:block;}
-.card{background:var(--card);border-radius:18px;padding:24px;max-width:420px;margin:0 auto 18px;}
-h1{font-size:36px;margin:20px 0;}
-button{background:var(--accent);color:var(--text);border:none;border-radius:14px;padding:14px 22px;font-size:16px;margin:8px;cursor:pointer;}
-input,select{width:100%;padding:14px;border-radius:12px;border:none;background:#1e1e23;color:white;margin-bottom:10px;}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
-.tile{background:#ffffff;padding:30px 10px;border-radius:16px;font-size:18px;cursor:pointer;}
-.tile.used{opacity:.35;pointer-events:none;}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:10;}
-.overlay.show{display:flex;}
-.overlay.imposter{background:var(--imposter-bg);}
-.muted{color:var(--muted);}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,ui-sans-serif,system-ui,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  min-height:-webkit-fill-available;
+  overflow-x:hidden;
+  position:relative;
+}
+body::before{
+  content:'';
+  position:fixed;
+  inset:0;
+  background:radial-gradient(circle at 50% 0%,rgba(255,255,255,0.08),transparent 60%);
+  pointer-events:none;
+  z-index:0;
+}
+html{height:-webkit-fill-available}
+.screen{
+  display:none;
+  min-height:100vh;
+  min-height:-webkit-fill-available;
+  padding:20px;
+  animation:fadeIn .4s ease;
+  position:relative;
+  z-index:1;
+}
+.screen.active{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:28px;
+  padding:36px;
+  max-width:480px;
+  width:100%;
+  margin:0 auto;
+  box-shadow:0 25px 80px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.03);
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';
+  position:absolute;
+  top:-50%;
+  left:-50%;
+  width:200%;
+  height:200%;
+  background:radial-gradient(circle,rgba(255,255,255,0.04),transparent 40%);
+  pointer-events:none;
+}
+.card>*{position:relative}
+h1{
+  font-size:clamp(48px,12vw,72px);
+  margin:0 0 12px 0;
+  font-weight:900;
+  background:linear-gradient(135deg,#ffffff 0%,#d4d4d8 100%);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-2px;
+  text-shadow:0 0 60px var(--accent-glow);
+}
+h2{
+  font-size:clamp(24px,5vw,32px);
+  margin:0 0 24px 0;
+  font-weight:700;
+  letter-spacing:-.5px;
+}
+button{
+  background:linear-gradient(135deg,var(--accent),#d4d4d8);
+  color:#000000;
+  border:none;
+  border-radius:20px;
+  padding:18px 36px;
+  font-size:17px;
+  font-weight:700;
+  margin:10px;
+  cursor:pointer;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:0 0 30px var(--accent-glow),0 8px 24px rgba(0,0,0,.4);
+  -webkit-user-select:none;
+  user-select:none;
+  position:relative;
+  overflow:hidden;
+  letter-spacing:.3px;
+}
+button::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);
+  opacity:0;
+  transition:opacity .3s;
+}
+button:active{
+  transform:scale(.96);
+  box-shadow:0 0 20px var(--accent-glow),0 4px 12px rgba(0,0,0,.5);
+}
+button:active::before{opacity:1}
+button.secondary{
+  background:var(--card-light);
+  border:2px solid var(--border);
+  box-shadow:0 4px 12px rgba(0,0,0,.3);
+}
+button.secondary:active{
+  background:var(--card);
+  border-color:var(--accent);
+}
+input,select{
+  width:100%;
+  padding:18px;
+  border-radius:16px;
+  border:2px solid var(--border);
+  background:var(--card-light);
+  color:var(--text);
+  margin-bottom:16px;
+  font-size:16px;
+  transition:all .3s ease;
+  font-weight:500;
+}
+input:focus,select:focus{
+  outline:none;
+  border-color:var(--accent);
+  background:var(--card);
+  box-shadow:0 0 0 4px var(--accent-glow);
+}
+label{
+  display:block;
+  text-align:left;
+  margin-bottom:10px;
+  font-weight:700;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:1px;
+  color:var(--text-muted);
+}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:14px;
+  max-width:900px;
+  width:100%;
+  margin:0 auto;
+}
+.tile{
+  background:var(--card);
+  border:2px solid var(--border);
+  padding:36px 20px;
+  border-radius:24px;
+  font-size:18px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  position:relative;
+  overflow:hidden;
+  -webkit-user-select:none;
+  user-select:none;
+  letter-spacing:.3px;
+}
+.tile::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:linear-gradient(135deg,var(--accent),#d4d4d8);
+  opacity:0;
+  transition:opacity .3s;
+}
+.tile::after{
+  content:'';
+  position:absolute;
+  inset:-2px;
+  border-radius:24px;
+  padding:2px;
+  background:linear-gradient(135deg,var(--accent),#d4d4d8);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  opacity:0;
+  transition:opacity .3s;
+}
+.tile:active{
+  transform:scale(.95);
+  box-shadow:0 0 40px var(--accent-glow);
+}
+.tile:active::before{opacity:.15}
+.tile:active::after{opacity:1}
+.tile span{position:relative;z-index:1}
+.tile.used{
+  opacity:.25;
+  pointer-events:none;
+  background:var(--card-light);
+  transform:scale(.97);
+}
+.overlay{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.95);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:100;
+  animation:fadeIn .3s ease;
+  padding:20px;
+}
+.overlay.show{display:flex}
+.overlay .card{
+  animation:slideUp .4s cubic-bezier(.4,0,.2,1);
+  max-width:440px;
+  margin-bottom:0;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+.muted{color:var(--text-muted);font-weight:500}
+.subtitle{
+  font-size:18px;
+  color:var(--text-muted);
+  margin-bottom:40px;
+  font-weight:500;
+  letter-spacing:.3px;
+}
+#names{margin:24px 0}
+.speaker-card{
+  background:linear-gradient(135deg,var(--accent),#d4d4d8);
+  padding:28px;
+  border-radius:24px;
+  margin-bottom:20px;
+  box-shadow:0 0 40px var(--accent-glow),0 12px 32px rgba(0,0,0,.5);
+  color:#000000;
+}
+.speaker-card h3{
+  margin:0 0 10px 0;
+  font-size:13px;
+  text-transform:uppercase;
+  letter-spacing:2px;
+  opacity:.7;
+  font-weight:700;
+}
+.speaker-card h2{
+  margin:0;
+  font-size:clamp(26px,6vw,36px);
+  font-weight:800;
+  letter-spacing:-.5px;
+  color:#000000;
+}
+.role-card{text-align:center;padding:40px}
+.role-word{
+  font-size:clamp(40px,10vw,56px);
+  font-weight:900;
+  margin:28px 0;
+  background:linear-gradient(135deg,var(--success),#34d399);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-1px;
+  text-shadow:0 0 60px rgba(34,197,94,.4);
+}
+.role-hint{
+  font-size:22px;
+  color:var(--text-muted);
+  font-style:italic;
+  margin-top:20px;
+  font-weight:600;
+  letter-spacing:.5px;
+}
+.imposter-text{
+  font-size:clamp(44px,12vw,60px);
+  font-weight:900;
+  margin:28px 0;
+  background:linear-gradient(135deg,var(--danger),#f87171);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  letter-spacing:-1px;
+  text-shadow:0 0 60px rgba(239,68,68,.4);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1}
+  50%{opacity:.8}
+}
+.final-word{
+  font-size:clamp(36px,8vw,48px);
+  font-weight:800;
+  color:var(--success);
+  margin:24px 0;
+  letter-spacing:-.5px;
+  text-shadow:0 0 40px rgba(34,197,94,.3);
+}
+@media(max-width:600px){
+  .card{padding:28px 24px}
+  .grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .tile{padding:28px 16px;font-size:16px}
+  h1{letter-spacing:-1px}
+}
 </style>
 </head>
 <body>
-
 <!-- MENU -->
 <div id="menu" class="screen active">
-  <h1>IMPOSTER</h1>
-  <div class="card">
-    <button id="startBtn">Start Game</button>
+  <div>
+    <h1>IMPOSTER</h1>
+    <p class="subtitle">Find the imposters among you</p>
+    <div class="card">
+      <button id="startBtn">Start Game</button>
+    </div>
   </div>
 </div>
-
 <!-- SETUP -->
 <div id="setup" class="screen">
-  <h2>Game Setup</h2>
-  <div class="card">
-    <label>Players</label>
-    <input id="playerCount" type="number" min="4" max="12" value="6">
-    <label>Imposters</label>
-    <input id="imposterCount" type="number" min="1" max="3" value="1">
-    <label>Category</label>
-    <select id="category">
-      <option value="all">All</option>
-      <option value="sports">Sports</option>
-      <option value="animals">Animals</option>
-      <option value="food">Food</option>
-      <option value="locations">Locations</option>
-      <option value="objects">Objects</option>
-    </select>
-    <button id="namesBtn">Set Names</button>
-    <div id="names"></div>
-    <button id="beginBtn">Begin</button>
-    <button id="backBtn">Back</button>
+  <div style="width:100%;max-width:480px">
+    <h2>Game Setup</h2>
+    <div class="card">
+      <label>Number of Players</label>
+      <input id="playerCount" type="number" min="4" max="12" value="6">
+      <label>Number of Imposters</label>
+      <input id="imposterCount" type="number" min="1" max="3" value="1">
+      <label>Category</label>
+      <select id="category">
+        <option value="all">All Categories</option>
+        <option value="sports">Sports</option>
+        <option value="animals">Animals</option>
+        <option value="food">Food & Drink</option>
+        <option value="locations">Locations</option>
+        <option value="objects">Objects</option>
+        <option value="entertainment">Entertainment</option>
+        <option value="professions">Professions</option>
+      </select>
+      <button id="namesBtn">Set Player Names</button>
+      <div id="names"></div>
+      <button id="beginBtn">Begin Game</button>
+      <button id="backBtn" class="secondary">Back to Menu</button>
+    </div>
   </div>
 </div>
-
 <!-- GAME -->
 <div id="game" class="screen">
-  <div class="card">
-    <h2 id="speaker"></h2>
+  <div style="width:100%;max-width:900px">
+    <div class="speaker-card">
+      <h3>First Speaker</h3>
+      <h2 id="speaker"></h2>
+    </div>
+    <div id="grid" class="grid"></div>
+    <button id="revealBtn" style="display:none">Reveal Answer</button>
   </div>
-  <div id="grid" class="grid"></div>
-  <button id="revealBtn" style="display:none">Reveal</button>
 </div>
-
-<!-- ROLE OVERLAY -->
+<!-- ROLE -->
 <div id="roleOverlay" class="overlay">
-  <div class="card">
-    <h2 id="roleTitle"></h2>
-    <p id="roleText"></p>
-    <button id="closeRole">Close</button>
+  <div class="card role-card">
+    <div id="roleContent"></div>
+    <button id="closeRole">Got It</button>
   </div>
 </div>
-
-<!-- FINAL REVEAL -->
+<!-- FINAL -->
 <div id="finalOverlay" class="overlay">
   <div class="card">
-    <h2>Answer</h2>
-    <p id="finalWord"></p>
-    <p class="muted">Imposters:</p>
-    <p id="finalImposters"></p>
-    <button id="nextRound">Next Round</button>
+    <h2>Game Over</h2>
+    <p class="muted">The word was:</p>
+    <p class="final-word" id="finalWord"></p>
+    <p class="muted" style="margin-top:24px">The Imposters were:</p>
+    <p id="finalImposters" style="font-size:22px;font-weight:700;margin-top:12px"></p>
+    <button id="nextRound">Play Again</button>
+    <button id="menuBtn" class="secondary">Main Menu</button>
   </div>
 </div>
-
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
-
-// Elements
 const menu=document.getElementById("menu");
 const setup=document.getElementById("setup");
 const game=document.getElementById("game");
@@ -105,163 +407,106 @@ const grid=document.getElementById("grid");
 const speaker=document.getElementById("speaker");
 const revealBtn=document.getElementById("revealBtn");
 const roleOverlay=document.getElementById("roleOverlay");
-const roleTitle=document.getElementById("roleTitle");
-const roleText=document.getElementById("roleText");
+const roleContent=document.getElementById("roleContent");
 const finalOverlay=document.getElementById("finalOverlay");
 const finalWord=document.getElementById("finalWord");
 const finalImposters=document.getElementById("finalImposters");
 const playerCount=document.getElementById("playerCount");
 const imposterCount=document.getElementById("imposterCount");
 const category=document.getElementById("category");
-
-// Word data (~300 words)
-const data=[
-/* SPORTS PLAYERS & TEAMS */
-{word:"LeBron James", hint:"longevity", category:"sports"},
-{word:"Stephen Curry", hint:"range", category:"sports"},
-{word:"Kevin Durant", hint:"silky", category:"sports"},
-{word:"Giannis Antetokounmpo", hint:"stride", category:"sports"},
-{word:"Luka Doncic", hint:"pivot", category:"sports"},
-{word:"Joel Embiid", hint:"post", category:"sports"},
-{word:"Anthony Davis", hint:"block", category:"sports"},
-{word:"Kawhi Leonard", hint:"claw", category:"sports"},
-{word:"James Harden", hint:"stepback", category:"sports"},
-{word:"Nikola Jokic", hint:"vision", category:"sports"},
-{word:"Patrick Mahomes", hint:"sidearm", category:"sports"},
-{word:"Tom Brady", hint:"pocket", category:"sports"},
-{word:"Aaron Rodgers", hint:"launch", category:"sports"},
-{word:"Josh Allen", hint:"arm", category:"sports"},
-{word:"Joe Burrow", hint:"clutch", category:"sports"},
-{word:"Dak Prescott", hint:"sideline", category:"sports"},
-{word:"Derrick Henry", hint:"power", category:"sports"},
-{word:"Nick Chubb", hint:"run", category:"sports"},
-{word:"Shohei Ohtani", hint:"two-way", category:"sports"},
-{word:"Aaron Judge", hint:"tower", category:"sports"},
-{word:"Mike Trout", hint:"all-around", category:"sports"},
-{word:"Mookie Betts", hint:"speed", category:"sports"},
-{word:"Yankees", hint:"pinstripes", category:"sports"},
-{word:"Red Sox", hint:"curse", category:"sports"},
-{word:"Dodgers", hint:"blue", category:"sports"},
-{word:"Cubs", hint:"ivy", category:"sports"},
-{word:"Lakers", hint:"gold", category:"sports"},
-{word:"Warriors", hint:"splash", category:"sports"},
-{word:"Packers", hint:"cheese", category:"sports"},
-{word:"Patriots", hint:"dynasty", category:"sports"},
-// ANIMALS
-{word:"Dog", hint:"leash", category:"animals"},
-{word:"Cat", hint:"whiskers", category:"animals"},
-{word:"Lion", hint:"mane", category:"animals"},
-{word:"Tiger", hint:"stripes", category:"animals"},
-{word:"Bear", hint:"hibernate", category:"animals"},
-{word:"Wolf", hint:"pack", category:"animals"},
-{word:"Fox", hint:"sly", category:"animals"},
-{word:"Deer", hint:"antlers", category:"animals"},
-{word:"Rabbit", hint:"burrow", category:"animals"},
-{word:"Kangaroo", hint:"pouch", category:"animals"},
-{word:"Koala", hint:"eucalyptus", category:"animals"},
-{word:"Penguin", hint:"waddle", category:"animals"},
-{word:"Owl", hint:"nocturnal", category:"animals"},
-{word:"Eagle", hint:"talons", category:"animals"},
-{word:"Frog", hint:"lily", category:"animals"},
-{word:"Snake", hint:"coil", category:"animals"},
-{word:"Turtle", hint:"shell", category:"animals"},
-{word:"Shark", hint:"fins", category:"animals"},
-{word:"Dolphin", hint:"pod", category:"animals"},
-{word:"Whale", hint:"blowhole", category:"animals"},
-{word:"Octopus", hint:"ink", category:"animals"},
-{word:"Horse", hint:"saddle", category:"animals"},
-{word:"Cow", hint:"pasture", category:"animals"},
-{word:"Pig", hint:"snout", category:"animals"},
-{word:"Goat", hint:"bleat", category:"animals"},
-// FOOD
-{word:"Pizza", hint:"slice", category:"food"},
-{word:"Burger", hint:"stack", category:"food"},
-{word:"Pasta", hint:"twirl", category:"food"},
-{word:"Rice", hint:"grain", category:"food"},
-{word:"Bread", hint:"loaf", category:"food"},
-{word:"Soup", hint:"broth", category:"food"},
-{word:"Salad", hint:"toss", category:"food"},
-{word:"Taco", hint:"shell", category:"food"},
-{word:"Burrito", hint:"wrap", category:"food"},
-{word:"Sandwich", hint:"layers", category:"food"},
-{word:"Fries", hint:"basket", category:"food"},
-{word:"Donut", hint:"glaze", category:"food"},
-{word:"Bagel", hint:"hole", category:"food"},
-{word:"Pancake", hint:"flip", category:"food"},
-{word:"Waffle", hint:"grid", category:"food"},
-{word:"Ice Cream", hint:"scoop", category:"food"},
-{word:"Cake", hint:"frosting", category:"food"},
-{word:"Cookie", hint:"crumb", category:"food"},
-{word:"Brownie", hint:"fudge", category:"food"},
-{word:"Cereal", hint:"bowl", category:"food"},
-{word:"Sushi", hint:"roll", category:"food"},
-{word:"Ramen", hint:"noodles", category:"food"},
-{word:"Steak", hint:"sear", category:"food"},
-{word:"Eggs", hint:"yolk", category:"food"},
-{word:"Chicken", hint:"breast", category:"food"},
-{word:"Cheese", hint:"melt", category:"food"},
-{word:"Apple", hint:"core", category:"food"},
-{word:"Banana", hint:"peel", category:"food"},
-{word:"Carrot", hint:"root", category:"food"},
-{word:"Corn", hint:"kernel", category:"food"},
-// LOCATIONS
-{word:"Library", hint:"stacks", category:"locations"},
-{word:"Airport", hint:"gate", category:"locations"},
-{word:"Beach", hint:"shore", category:"locations"},
-{word:"Forest", hint:"canopy", category:"locations"},
-{word:"Mountain", hint:"ridge", category:"locations"},
-{word:"Desert", hint:"dunes", category:"locations"},
-{word:"City", hint:"grid", category:"locations"},
-{word:"Village", hint:"square", category:"locations"},
-{word:"School", hint:"hallway", category:"locations"},
-{word:"Hospital", hint:"ward", category:"locations"},
-{word:"Stadium", hint:"bleachers", category:"locations"},
-{word:"Mall", hint:"atrium", category:"locations"},
-{word:"Park", hint:"bench", category:"locations"},
-{word:"Zoo", hint:"enclosure", category:"locations"},
-{word:"Museum", hint:"exhibit", category:"locations"},
-{word:"Church", hint:"pews", category:"locations"},
-{word:"Theater", hint:"curtain", category:"locations"},
-{word:"Garage", hint:"tools", category:"locations"},
-{word:"Hotel", hint:"lobby", category:"locations"},
-{word:"Office", hint:"cubicle", category:"locations"},
-{word:"Restaurant", hint:"menu", category:"locations"},
-{word:"Gym", hint:"weights", category:"locations"},
-{word:"Train Station", hint:"platform", category:"locations"},
-{word:"Harbor", hint:"dock", category:"locations"},
-{word:"Playground", hint:"swing", category:"locations"},
-// OBJECTS
-{word:"Phone", hint:"screen", category:"objects"},
-{word:"Keys", hint:"jingle", category:"objects"},
-{word:"Backpack", hint:"zipper", category:"objects"},
-{word:"Chair", hint:"legs", category:"objects"},
-{word:"Table", hint:"edge", category:"objects"},
-{word:"Clock", hint:"hands", category:"objects"},
-{word:"Bottle", hint:"cap", category:"objects"},
-{word:"Pen", hint:"click", category:"objects"},
-{word:"Notebook", hint:"margin", category:"objects"},
-{word:"Remote", hint:"buttons", category:"objects"},
-{word:"Lamp", hint:"shade", category:"objects"},
-{word:"Wallet", hint:"fold", category:"objects"},
-{word:"Mirror", hint:"reflection", category:"objects"},
-{word:"Shoes", hint:"laces", category:"objects"},
-{word:"Watch", hint:"band", category:"objects"},
-{word:"Glasses", hint:"frames", category:"objects"},
-{word:"Hat", hint:"brim", category:"objects"},
-{word:"Book", hint:"pages", category:"objects"},
-{word:"Bag", hint:"strap", category:"objects"},
-{word:"Umbrella", hint:"handle", category:"objects"}
-];
-
-// Game variables
-let names=[], roles=[], current, viewed=0;
-
-// NAV
-function showScreen(screen){ [menu,setup,game].forEach(x=>x.classList.remove("active")); screen.classList.add("active"); }
-document.getElementById("startBtn").onclick=()=>showScreen(setup);
-document.getElementById("backBtn").onclick=()=>showScreen(menu);
-
-// Names setup
+const data={
+sports:[
+  ["Basketball","crossover"],["Football","blitz"],["Baseball","changeup"],
+  ["Soccer","nutmeg"],["Tennis","topspin"],["Golf","fade"],
+  ["Hockey","deke"],["Volleyball","libero"],["Swimming","butterfly"],
+  ["Boxing","uppercut"],["Wrestling","takedown"],["Gymnastics","vault"],
+  ["Track","baton"],["Skiing","mogul"],["Surfing","cutback"],
+  ["Skateboarding","kickflip"],["Cricket","googly"],["Rugby","lineout"],
+  ["Bowling","split"],["Lacrosse","ground ball"],["Badminton","smash"],
+  ["Archery","nock"],["Fencing","riposte"],["Karate","kata"],
+  ["Cycling","peloton"],["Marathon","bonk"],["Polo","chukker"],
+  ["Diving","pike"],["Rowing","catch"],["Rock Climbing","crimp"]
+],
+animals:[
+  ["Dog","paw pad"],["Cat","whisker"],["Elephant","matriarch"],
+  ["Giraffe","ossicone"],["Lion","mane"],["Tiger","stripes"],
+  ["Bear","den"],["Monkey","opposable"],["Zebra","stallion"],
+  ["Penguin","molt"],["Eagle","talon"],["Dolphin","echolocation"],
+  ["Shark","cartilage"],["Whale","blowhole"],["Snake","molt"],
+  ["Frog","tadpole"],["Rabbit","warren"],["Turtle","carapace"],
+  ["Owl","pellet"],["Parrot","cere"],["Kangaroo","marsupial"],
+  ["Koala","fingerprint"],["Panda","cub"],["Peacock","train"],
+  ["Octopus","beak"],["Jellyfish","medusa"],["Butterfly","proboscis"],
+  ["Bee","waggle"],["Spider","spinneret"],["Crocodile","osteoderm"]
+],
+food:[
+  ["Pizza","dough"],["Burger","sear"],["Sushi","nigiri"],
+  ["Pasta","al dente"],["Taco","masa"],["Sandwich","panini"],
+  ["Salad","vinaigrette"],["Soup","consommé"],["Steak","marbling"],
+  ["Chicken","brine"],["Fish","fillet"],["Rice","arborio"],
+  ["Cheese","rennet"],["Ice Cream","churn"],["Cake","crumb"],
+  ["Cookie","crimp"],["Donut","proof"],["Pancake","buttermilk"],
+  ["Waffle","batter"],["Cereal","toasted"],["Toast","caramelize"],
+  ["Egg","coddled"],["Bacon","cure"],["Hot Dog","casing"],
+  ["Burrito","fold"],["Nachos","queso"],["Popcorn","hull"],
+  ["Pretzel","lye"],["Chips","kettle"],["Fries","blanch"]
+],
+locations:[
+  ["Beach","dune"],["Mountain","summit"],["Forest","canopy"],
+  ["Desert","mirage"],["Lake","basin"],["River","meander"],
+  ["Park","gazebo"],["Zoo","enclosure"],["Museum","curator"],
+  ["Library","stacks"],["School","semester"],["Hospital","triage"],
+  ["Airport","tarmac"],["Train Station","depot"],["Mall","atrium"],
+  ["Restaurant","sommelier"],["Hotel","concierge"],["Gym","spotter"],
+  ["Theater","proscenium"],["Stadium","concourse"],["Church","nave"],
+  ["Castle","battlement"],["Bridge","abutment"],["Lighthouse","keeper"],
+  ["Farm","silo"],["Factory","conveyor"],["Warehouse","pallet"],
+  ["Bakery","lamination"],["Bank","vault"],["Post Office","sorter"]
+],
+objects:[
+  ["Phone","touchscreen"],["Computer","processor"],["TV","pixel"],
+  ["Book","spine"],["Pen","nib"],["Pencil","ferrule"],
+  ["Clock","escapement"],["Calendar","solstice"],["Camera","aperture"],
+  ["Mirror","silvering"],["Lamp","filament"],["Chair","spindle"],
+  ["Table","grain"],["Bed","box spring"],["Pillow","down"],
+  ["Blanket","weave"],["Cup","rim"],["Plate","glaze"],
+  ["Fork","tine"],["Knife","tang"],["Spoon","bowl"],
+  ["Bottle","neck"],["Can","seam"],["Bag","gusset"],
+  ["Backpack","sternum"],["Wallet","bifold"],["Keys","tumbler"],
+  ["Umbrella","ferrule"],["Sunglasses","polarized"],["Hat","crown"]
+],
+entertainment:[
+  ["Movie","montage"],["Concert","soundcheck"],["Play","understudy"],
+  ["Comedy Show","callback"],["Magic Show","misdirection"],["Circus","trapeze"],
+  ["Carnival","midway"],["Fair","livestock"],["Festival","headliner"],
+  ["Parade","grand marshal"],["Fireworks","finale"],["Party","rsvp"],
+  ["Dance","choreography"],["Karaoke","backing track"],["Arcade","high score"],
+  ["Bowling Alley","gutter"],["Roller Rink","jam skate"],["Amusement Park","fast pass"],
+  ["Water Park","lazy river"],["Escape Room","red herring"],["Laser Tag","respawn"],
+  ["Haunted House","jump scare"],["Campfire","embers"],["BBQ","low and slow"],
+  ["Picnic","checkered"],["Beach Party","tiki torch"],["Game Night","house rules"],
+  ["Trivia Night","lightning round"],["Talent Show","applause meter"],["Art Class","still life"]
+],
+professions:[
+  ["Doctor","rounds"],["Nurse","triage"],["Teacher","syllabus"],
+  ["Chef","mise en place"],["Waiter","expo"],["Pilot","yoke"],
+  ["Flight Attendant","galley"],["Driver","deadhead"],["Mechanic","torque"],
+  ["Plumber","snake"],["Electrician","breaker"],["Carpenter","rabbet"],
+  ["Painter","drop cloth"],["Firefighter","turnout"],["Police Officer","beat"],
+  ["Soldier","formation"],["Lawyer","deposition"],["Judge","bench"],
+  ["Cashier","drawer"],["Barista","tamp"],["Bartender","jigger"],
+  ["Photographer","bokeh"],["Musician","embouchure"],["Singer","falsetto"],
+  ["Actor","blocking"],["Dancer","spotting"],["Artist","gesso"],
+  ["Writer","manuscript"],["Journalist","byline"],["Scientist","hypothesis"]
+]
+};
+let names=[],roles=[],current,viewed=0;
+const show=s=>{
+  [menu,setup,game].forEach(x=>x.classList.remove("active"));
+  s.classList.add("active");
+};
+document.getElementById("startBtn").onclick=()=>show(setup);
+document.getElementById("backBtn").onclick=()=>show(menu);
 document.getElementById("namesBtn").onclick=()=>{
   namesDiv.innerHTML="";
   for(let i=0;i<playerCount.value;i++){
@@ -270,8 +515,6 @@ document.getElementById("namesBtn").onclick=()=>{
     namesDiv.appendChild(input);
   }
 };
-
-// Start round
 document.getElementById("beginBtn").onclick=()=>{
   names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
   startRound();
@@ -279,30 +522,47 @@ document.getElementById("beginBtn").onclick=()=>{
 document.getElementById("closeRole").onclick=()=>roleOverlay.classList.remove("show");
 document.getElementById("revealBtn").onclick=showReveal;
 document.getElementById("nextRound").onclick=startRound;
-
+document.getElementById("menuBtn").onclick=()=>{
+  finalOverlay.classList.remove("show");
+  show(menu);
+};
 function startRound(){
-  viewed=0; revealBtn.style.display="none"; finalOverlay.classList.remove("show"); showScreen(game);
-  let pool=category.value==="all"?data:data.filter(d=>d.category===category.value);
+  viewed=0;
+  revealBtn.style.display="none";
+  finalOverlay.classList.remove("show");
+  show(game);
+  const pool=category.value==="all"?Object.values(data).flat():data[category.value];
   current=pool[Math.floor(Math.random()*pool.length)];
   roles=Array(names.length).fill("player");
   for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++) roles[i]="imposter";
   roles.sort(()=>Math.random()-.5);
-  speaker.textContent="First word: "+names[Math.floor(Math.random()*names.length)];
+  speaker.textContent=names[Math.floor(Math.random()*names.length)];
   grid.innerHTML="";
   names.forEach((n,i)=>{
     const t=document.createElement("div");
-    t.className="tile"; t.textContent=n;
+    t.className="tile";
+    t.innerHTML=`<span>${n}</span>`;
     t.onclick=()=>{
-      roleOverlay.classList.add("show");
       if(roles[i]==="imposter"){
-        roleOverlay.classList.add("imposter");
-        roleTitle.textContent="IMPOSTER";
-        roleText.textContent="Hint: "+current.hint+" | Category: "+current.category;
-      } else {
-        roleOverlay.classList.remove("imposter");
-        roleTitle.textContent=current.word;
-        roleText.textContent="Stay niche.";
+        roleOverlay.style.background="rgba(239,68,68,.15)";
+        roleOverlay.style.backdropFilter="blur(12px)";
+        roleContent.innerHTML=`
+          <div class="imposter-text">IMPOSTER</div>
+          <p class="muted">You don't know the word</p>
+          <p style="font-size:20px;margin-top:20px;font-weight:700;color:var(--danger)">Category: ${category.value==="all"?"Mixed":category.value}</p>
+          <p style="font-size:18px;margin-top:12px;font-weight:600;color:var(--text-muted)">Hint: "${current[1]}"</p>
+          <p class="muted" style="margin-top:16px;font-size:15px">Blend in and figure it out</p>
+        `;
+      }else{
+        roleOverlay.style.background="rgba(0,0,0,.95)";
+        roleOverlay.style.backdropFilter="blur(12px)";
+        roleContent.innerHTML=`
+          <h2 style="margin-bottom:12px;color:var(--text-muted);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px">Your Word</h2>
+          <div class="role-word">${current[0]}</div>
+          <p class="muted" style="margin-top:16px;font-size:15px">Give subtle clues without being obvious</p>
+        `;
       }
+      roleOverlay.classList.add("show");
       t.classList.add("used");
       viewed++;
       if(viewed===names.length) revealBtn.style.display="block";
@@ -310,12 +570,12 @@ function startRound(){
     grid.appendChild(t);
   });
 }
-
 function showReveal(){
-  finalWord.textContent=current.word;
+  finalWord.textContent=current[0];
   finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
   finalOverlay.classList.add("show");
 }
+});
 </script>
 </body>
 </html>

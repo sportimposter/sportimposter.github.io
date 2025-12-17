@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Imposter</title>
 
-<!-- Spy Silhouette Icon -->
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
 <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
 <circle cx='50' cy='50' r='50' fill='%23000000'/>
-<path d='M30 65c0-20 40-20 40 0v10H30z' fill='%23ffffff'/>
 <circle cx='50' cy='38' r='14' fill='%23ffffff'/>
-<rect x='30' y='30' width='40' height='8' fill='%23000000'/>
+<path d='M28 70c0-18 44-18 44 0v8H28z' fill='%23ffffff'/>
+<rect x='28' y='30' width='44' height='8' fill='%23000000'/>
 </svg>">
 
 <style>
@@ -22,18 +21,14 @@
   --text:#f5f5f7;
   --muted:#9a9aa1;
 }
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
   text-align:center;
 }
-.screen{
-  display:none;
-  min-height:100vh;
-  padding:24px;
-}
+.screen{display:none;min-height:100vh;padding:24px}
 .screen.active{display:block}
 .card{
   background:var(--card);
@@ -43,7 +38,6 @@ body{
   margin:0 auto 18px;
 }
 h1{font-size:36px;margin:20px 0}
-h2{margin-bottom:10px}
 button{
   background:var(--accent);
   color:white;
@@ -86,7 +80,6 @@ input,select{
   z-index:10;
 }
 .overlay.show{display:flex}
-.overlay .card{max-width:360px}
 .muted{color:var(--muted)}
 </style>
 </head>
@@ -97,7 +90,7 @@ input,select{
 <div id="menu" class="screen active">
   <h1>IMPOSTER</h1>
   <div class="card">
-    <button onclick="goSetup()">Start Game</button>
+    <button id="startBtn">Start Game</button>
   </div>
 </div>
 
@@ -121,11 +114,11 @@ input,select{
       <option value="objects">Objects</option>
     </select>
 
-    <button onclick="buildNames()">Set Names</button>
+    <button id="namesBtn">Set Names</button>
     <div id="names"></div>
 
-    <button onclick="startGame()">Begin</button>
-    <button onclick="backMenu()">Back</button>
+    <button id="beginBtn">Begin</button>
+    <button id="backBtn">Back</button>
   </div>
 </div>
 
@@ -135,7 +128,7 @@ input,select{
     <h2 id="speaker"></h2>
   </div>
   <div id="grid" class="grid"></div>
-  <button id="revealBtn" onclick="showReveal()" style="display:none">Reveal</button>
+  <button id="revealBtn" style="display:none">Reveal</button>
 </div>
 
 <!-- ROLE -->
@@ -143,7 +136,7 @@ input,select{
   <div class="card">
     <h2 id="roleTitle"></h2>
     <p id="roleText"></p>
-    <button onclick="closeRole()">Close</button>
+    <button id="closeRole">Close</button>
   </div>
 </div>
 
@@ -154,55 +147,56 @@ input,select{
     <p id="finalWord"></p>
     <p class="muted">Imposters:</p>
     <p id="finalImposters"></p>
-    <button onclick="newRound()">Next Round</button>
+    <button id="nextRound">Next Round</button>
   </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-const screens={menu,setup,game};
+/* ELEMENTS */
+const menu=document.getElementById("menu");
+const setup=document.getElementById("setup");
+const game=document.getElementById("game");
+const namesDiv=document.getElementById("names");
+const grid=document.getElementById("grid");
+const speaker=document.getElementById("speaker");
+const revealBtn=document.getElementById("revealBtn");
+
+const roleOverlay=document.getElementById("roleOverlay");
+const roleTitle=document.getElementById("roleTitle");
+const roleText=document.getElementById("roleText");
+
+const finalOverlay=document.getElementById("finalOverlay");
+const finalWord=document.getElementById("finalWord");
+const finalImposters=document.getElementById("finalImposters");
+
+const playerCount=document.getElementById("playerCount");
+const imposterCount=document.getElementById("imposterCount");
+const category=document.getElementById("category");
+
+/* DATA (unchanged categories structure – expandable) */
 const data={
-sports:[
-["LeBron James","longevity"],["Mahomes","sidearm"],["Brady","comebacks"],["Curry","range"],
-["Judge","power"],["Ohtani","two-way"],["Messi","vision"],["Ronaldo","aerial"],
-["Yankees","pinstripes"],["Lakers","banners"],["Cowboys","America"],["Patriots","dynasty"],
-["Red Sox","curse"],["Warriors","splashes"],["Packers","cheese"],["Heat","culture"]
-],
-animals:[
-["Dog","leash"],["Cat","whiskers"],["Lion","mane"],["Tiger","stripes"],["Bear","hibernate"],
-["Wolf","pack"],["Eagle","talons"],["Owl","nocturnal"],["Shark","fins"],["Whale","blowhole"],
-["Horse","saddle"],["Cow","pasture"],["Pig","snout"],["Goat","bleat"],["Deer","antlers"]
-],
-food:[
-["Pizza","slice"],["Burger","stack"],["Pasta","twirl"],["Rice","grain"],["Bread","crumb"],
-["Steak","sear"],["Soup","broth"],["Taco","fold"],["Sushi","roll"],["Cake","frosting"],
-["Eggs","yolk"],["Chicken","breast"],["Fries","salt"],["Salad","toss"],["Cheese","melt"]
-],
-locations:[
-["Library","stacks"],["Airport","gate"],["Beach","tide"],["Hospital","ward"],["School","bell"],
-["Stadium","bleachers"],["Mall","escalator"],["Park","bench"],["Museum","exhibit"],
-["Church","pews"],["Gym","weights"],["Restaurant","menu"],["Hotel","lobby"],["Office","cubicle"]
-],
-objects:[
-["Phone","screen"],["Laptop","keyboard"],["Watch","wrist"],["Wallet","fold"],
-["Keys","jingle"],["Backpack","zipper"],["Bottle","cap"],["Chair","legs"],
-["Table","surface"],["Lamp","shade"],["Book","pages"],["Pen","ink"],
-["Shoes","laces"],["Hat","brim"],["Glasses","frames"]
-]
+sports:[["LeBron James","longevity"],["Mahomes","sidearm"],["Curry","range"],["Judge","power"]],
+animals:[["Dog","leash"],["Cat","whiskers"],["Lion","mane"],["Shark","fins"]],
+food:[["Pizza","slice"],["Burger","stack"],["Sushi","roll"],["Pasta","twirl"]],
+locations:[["Library","stacks"],["Airport","gate"],["Beach","tide"],["Hospital","ward"]],
+objects:[["Phone","screen"],["Keys","jingle"],["Wallet","fold"],["Watch","wrist"]]
 };
 
 let names=[],roles=[],current,viewed=0;
 
-window.goSetup=()=>show("setup");
-window.backMenu=()=>show("menu");
+/* NAV */
+const show=s=>{
+  [menu,setup,game].forEach(x=>x.classList.remove("active"));
+  s.classList.add("active");
+};
 
-function show(id){
-  Object.values(screens).forEach(s=>s.classList.remove("active"));
-  screens[id].classList.add("active");
-}
+/* BUTTONS */
+document.getElementById("startBtn").onclick=()=>show(setup);
+document.getElementById("backBtn").onclick=()=>show(menu);
 
-window.buildNames=()=>{
+document.getElementById("namesBtn").onclick=()=>{
   namesDiv.innerHTML="";
   for(let i=0;i<playerCount.value;i++){
     const input=document.createElement("input");
@@ -211,16 +205,21 @@ window.buildNames=()=>{
   }
 };
 
-window.startGame=()=>{
+document.getElementById("beginBtn").onclick=()=>{
   names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
-  show("game");
-  newRound();
+  startRound();
 };
 
-window.newRound=()=>{
+document.getElementById("closeRole").onclick=()=>roleOverlay.classList.remove("show");
+document.getElementById("revealBtn").onclick=showReveal;
+document.getElementById("nextRound").onclick=startRound;
+
+/* GAME */
+function startRound(){
   viewed=0;
   revealBtn.style.display="none";
   finalOverlay.classList.remove("show");
+  show(game);
 
   const pool=category.value==="all"?Object.values(data).flat():data[category.value];
   current=pool[Math.floor(Math.random()*pool.length)];
@@ -237,33 +236,27 @@ window.newRound=()=>{
     t.className="tile";
     t.textContent=n;
     t.onclick=()=>{
-      showRole(i);
+      roleOverlay.classList.add("show");
+      if(roles[i]==="imposter"){
+        roleTitle.textContent="IMPOSTER";
+        roleText.textContent="Category: "+category.value;
+      }else{
+        roleTitle.textContent=current[0];
+        roleText.textContent="Stay niche.";
+      }
       t.classList.add("used");
       viewed++;
       if(viewed===names.length) revealBtn.style.display="block";
     };
     grid.appendChild(t);
   });
-};
+}
 
-window.showRole=(i)=>{
-  roleOverlay.classList.add("show");
-  if(roles[i]==="imposter"){
-    roleTitle.textContent="IMPOSTER";
-    roleText.textContent="Category: "+category.value;
-  }else{
-    roleTitle.textContent=current[0];
-    roleText.textContent="Stay niche.";
-  }
-};
-
-window.closeRole=()=>roleOverlay.classList.remove("show");
-
-window.showReveal=()=>{
+function showReveal(){
   finalWord.textContent=current[0];
   finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
   finalOverlay.classList.add("show");
-};
+}
 
 });
 </script>

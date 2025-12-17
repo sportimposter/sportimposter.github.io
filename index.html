@@ -327,12 +327,15 @@ label{
   .tile{padding:28px 16px;font-size:16px}
   h1{letter-spacing:-1px}
 }
+@supports not (backdrop-filter:blur(12px)){
+  .overlay{background:rgba(0,0,0,.98)}
+}
 </style>
 </head>
 <body>
 <!-- MENU -->
 <div id="menu" class="screen active">
-  <div>
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center">
     <h1>IMPOSTER</h1>
     <p class="subtitle">Find the imposters among you</p>
     <div class="card">
@@ -375,7 +378,9 @@ label{
       <h2 id="speaker"></h2>
     </div>
     <div id="grid" class="grid"></div>
-    <button id="revealBtn" style="display:none">Reveal Answer</button>
+    <div style="margin-top:20px">
+      <button id="revealBtn" style="display:none">Reveal Answer</button>
+    </div>
   </div>
 </div>
 <!-- ROLE -->
@@ -500,7 +505,16 @@ professions:[
   ["Writer","manuscript"],["Journalist","byline"],["Scientist","hypothesis"]
 ]
 };
-let names=[],roles=[],current,viewed=0;
+const categoryNames={
+  sports:"Sports",
+  animals:"Animals",
+  food:"Food & Drink",
+  locations:"Locations",
+  objects:"Objects",
+  entertainment:"Entertainment",
+  professions:"Professions"
+};
+let names=[],roles=[],current,currentCategory,viewed=0;
 const show=s=>{
   [menu,setup,game].forEach(x=>x.classList.remove("active"));
   s.classList.add("active");
@@ -531,8 +545,16 @@ function startRound(){
   revealBtn.style.display="none";
   finalOverlay.classList.remove("show");
   show(game);
-  const pool=category.value==="all"?Object.values(data).flat():data[category.value];
-  current=pool[Math.floor(Math.random()*pool.length)];
+  if(category.value==="all"){
+    const categories=Object.keys(data);
+    currentCategory=categories[Math.floor(Math.random()*categories.length)];
+    const pool=data[currentCategory];
+    current=pool[Math.floor(Math.random()*pool.length)];
+  }else{
+    currentCategory=category.value;
+    const pool=data[currentCategory];
+    current=pool[Math.floor(Math.random()*pool.length)];
+  }
   roles=Array(names.length).fill("player");
   for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++) roles[i]="imposter";
   roles.sort(()=>Math.random()-.5);
@@ -542,20 +564,23 @@ function startRound(){
     const t=document.createElement("div");
     t.className="tile";
     t.innerHTML=`<span>${n}</span>`;
-    t.onclick=()=>{
+    const showRole=()=>{
+      if(t.classList.contains("used")) return;
       if(roles[i]==="imposter"){
         roleOverlay.style.background="rgba(239,68,68,.15)";
         roleOverlay.style.backdropFilter="blur(12px)";
+        roleOverlay.style.webkitBackdropFilter="blur(12px)";
         roleContent.innerHTML=`
           <div class="imposter-text">IMPOSTER</div>
           <p class="muted">You don't know the word</p>
-          <p style="font-size:20px;margin-top:20px;font-weight:700;color:var(--danger)">Category: ${category.value==="all"?"Mixed":category.value}</p>
+          <p style="font-size:20px;margin-top:20px;font-weight:700;color:var(--danger)">Category: ${categoryNames[currentCategory]}</p>
           <p style="font-size:18px;margin-top:12px;font-weight:600;color:var(--text-muted)">Hint: "${current[1]}"</p>
           <p class="muted" style="margin-top:16px;font-size:15px">Blend in and figure it out</p>
         `;
       }else{
         roleOverlay.style.background="rgba(0,0,0,.95)";
         roleOverlay.style.backdropFilter="blur(12px)";
+        roleOverlay.style.webkitBackdropFilter="blur(12px)";
         roleContent.innerHTML=`
           <h2 style="margin-bottom:12px;color:var(--text-muted);font-size:16px;font-weight:600;text-transform:uppercase;letter-spacing:1px">Your Word</h2>
           <div class="role-word">${current[0]}</div>
@@ -566,6 +591,11 @@ function startRound(){
       t.classList.add("used");
       viewed++;
       if(viewed===names.length) revealBtn.style.display="block";
+    };
+    t.onclick=showRole;
+    t.ontouchstart=(e)=>{
+      e.preventDefault();
+      showRole();
     };
     grid.appendChild(t);
   });

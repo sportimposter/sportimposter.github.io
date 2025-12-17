@@ -28,7 +28,6 @@ padding:16px;
 }
 
 .hidden{display:none}
-
 .screen{max-width:420px;margin:auto}
 
 .card{
@@ -103,12 +102,10 @@ background:rgba(0,0,0,.92);
 display:flex;
 align-items:center;
 justify-content:center;
-opacity:0;
-pointer-events:none;
-transition:.25s;
+display:none;
 }
 
-.overlay.show{opacity:1;pointer-events:auto}
+.overlay.show{display:flex}
 
 .modal{
 background:#000;
@@ -119,8 +116,6 @@ width:90%;
 max-width:360px;
 text-align:center;
 }
-
-.icon{font-size:42px;margin-bottom:10px}
 </style>
 </head>
 
@@ -128,21 +123,22 @@ text-align:center;
 
 <div class="screen">
 
+<!-- MENU -->
 <div id="menu" class="card">
-<div class="icon">🕵️‍♂️</div>
 <h1>Imposter</h1>
 <p style="color:var(--muted)">A social deduction game</p>
-<button id="beginBtn">Begin</button>
+<button onclick="goSetup()">Begin</button>
 </div>
 
+<!-- SETUP -->
 <div id="setup" class="card hidden">
 <h2>Game Setup</h2>
 
-<label>Number of Players</label>
-<input id="playerCount" type="number" min="4" max="12" value="6">
+<label>Players</label>
+<input id="playerCount" type="number" value="6">
 
-<label>Number of Imposters</label>
-<input id="imposterCount" type="number" min="1" max="3" value="1">
+<label>Imposters</label>
+<input id="imposterCount" type="number" value="1">
 
 <label>Category</label>
 <select id="categorySelect">
@@ -156,59 +152,41 @@ text-align:center;
 
 <div id="names"></div>
 
-<button id="startBtn">Start Game</button>
-<button id="backBtn" class="secondary">Back</button>
+<button onclick="startGame()">Start Game</button>
+<button class="secondary" onclick="goMenu()">Back</button>
 </div>
 
+<!-- GAME -->
 <div id="game" class="card hidden">
 <p id="speaker"></p>
-<div class="grid" id="grid"></div>
-<button id="revealBtn" class="secondary hidden">Reveal</button>
-<button id="nextBtn" class="secondary">Next Round</button>
+<div id="grid" class="grid"></div>
+<button class="secondary hidden" id="revealBtn" onclick="showReveal()">Reveal</button>
+<button class="secondary" onclick="newRound()">Next Round</button>
 </div>
 
 </div>
 
+<!-- ROLE -->
 <div id="overlay" class="overlay">
 <div class="modal">
 <h2 id="roleTitle"></h2>
 <p id="roleText"></p>
-<button id="okBtn">OK</button>
+<button onclick="closeOverlay()">OK</button>
 </div>
 </div>
 
+<!-- REVEAL -->
 <div id="reveal" class="overlay">
 <div class="modal">
 <h2>Answer</h2>
 <p id="finalAnswer"></p>
 <p><b>Imposters</b></p>
 <p id="finalImposters"></p>
-<button id="doneBtn">Done</button>
+<button onclick="closeReveal()">Done</button>
 </div>
 </div>
 
 <script>
-/* DOM */
-const menu = document.getElementById("menu");
-const setup = document.getElementById("setup");
-const game = document.getElementById("game");
-const namesDiv = document.getElementById("names");
-const grid = document.getElementById("grid");
-const overlay = document.getElementById("overlay");
-const reveal = document.getElementById("reveal");
-const speaker = document.getElementById("speaker");
-const revealBtn = document.getElementById("revealBtn");
-
-const playerCount = document.getElementById("playerCount");
-const imposterCount = document.getElementById("imposterCount");
-const categorySelect = document.getElementById("categorySelect");
-
-const roleTitle = document.getElementById("roleTitle");
-const roleText = document.getElementById("roleText");
-const finalAnswer = document.getElementById("finalAnswer");
-const finalImposters = document.getElementById("finalImposters");
-
-/* DATA */
 const data={
 sports:[["LeBron James","longevity"],["Mahomes","sidearm"],["Ohtani","two-way"]],
 animals:[["Dog","leash"],["Cat","whiskers"],["Lion","mane"]],
@@ -217,40 +195,33 @@ locations:[["Library","stacks"],["Airport","gate"],["Beach","shore"]],
 objects:[["Phone","screen"],["Keys","jingle"],["Clock","hands"]]
 };
 
-let names=[], roles=[], current={}, viewed=0;
+let names=[],roles=[],current={},viewed=0;
 
-/* FLOW */
-document.getElementById("beginBtn").onclick=()=>{
+function goSetup(){
 menu.classList.add("hidden");
 setup.classList.remove("hidden");
 buildNames();
-};
+}
 
-document.getElementById("backBtn").onclick=()=>{
+function goMenu(){
 setup.classList.add("hidden");
 menu.classList.remove("hidden");
-};
+}
 
-document.getElementById("startBtn").onclick=()=>{
-names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
-setup.classList.add("hidden");
-game.classList.remove("hidden");
-newRound();
-};
-
-document.getElementById("nextBtn").onclick=newRound;
-document.getElementById("okBtn").onclick=()=>overlay.classList.remove("show");
-document.getElementById("doneBtn").onclick=()=>reveal.classList.remove("show");
-revealBtn.onclick=showReveal;
-
-/* FUNCTIONS */
 function buildNames(){
 namesDiv.innerHTML="";
 for(let i=0;i<playerCount.value;i++){
 const input=document.createElement("input");
-input.placeholder=`Player ${i+1}`;
+input.placeholder="Player "+(i+1);
 namesDiv.appendChild(input);
 }
+}
+
+function startGame(){
+names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||("Player "+(n+1)));
+setup.classList.add("hidden");
+game.classList.remove("hidden");
+newRound();
 }
 
 function newRound(){
@@ -264,7 +235,7 @@ const pool = categorySelect.value==="all"
 current = pool[Math.floor(Math.random()*pool.length)];
 
 roles=Array(names.length).fill("player");
-for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++)roles[i]="imposter";
+for(let i=0;i<imposterCount.value;i++)roles[i]="imposter";
 roles.sort(()=>Math.random()-0.5);
 
 speaker.textContent="First word: "+names[Math.floor(Math.random()*names.length)];
@@ -274,7 +245,7 @@ names.forEach((n,i)=>{
 const tile=document.createElement("div");
 tile.className="tile";
 tile.textContent=n;
-tile.onclick=()=>{
+tile.onclick=function(){
 showRole(i);
 tile.classList.add("used");
 viewed++;
@@ -288,8 +259,23 @@ function showRole(i){
 overlay.classList.add("show");
 if(roles[i]==="imposter"){
 roleTitle.textContent="IMPOSTER";
-roleText.textContent=`Category: ${categorySelect.value}\nHint: ${current[1]}`;
+roleText.textContent="Category: "+categorySelect.value+" | Hint: "+current[1];
 }else{
 roleTitle.textContent=current[0];
 roleText.textContent="Stay niche.";
 }
+}
+
+function closeOverlay(){overlay.classList.remove("show")}
+
+function showReveal(){
+finalAnswer.textContent=current[0];
+finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
+reveal.classList.add("show");
+}
+
+function closeReveal(){reveal.classList.remove("show")}
+</script>
+
+</body>
+</html>

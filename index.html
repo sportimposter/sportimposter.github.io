@@ -2,272 +2,271 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Imposter</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Imposter</title>
+
+<!-- Spy Silhouette Icon -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
+<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
+<circle cx='50' cy='50' r='50' fill='%23000000'/>
+<path d='M30 65c0-20 40-20 40 0v10H30z' fill='%23ffffff'/>
+<circle cx='50' cy='38' r='14' fill='%23ffffff'/>
+<rect x='30' y='30' width='40' height='8' fill='%23000000'/>
+</svg>">
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap');
-
 :root{
---bg:#000;
---card:#0b0b0b;
---border:#1f1f1f;
---text:#f5f5f5;
---muted:#9ca3af;
---accent:#ffffff;
+  --bg:#0b0b0d;
+  --card:#141417;
+  --accent:#4f7cff;
+  --text:#f5f5f7;
+  --muted:#9a9aa1;
 }
-
-*{box-sizing:border-box;font-family:'Inter',system-ui,sans-serif}
-
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
 body{
-margin:0;
-background:var(--bg);
-color:var(--text);
-padding:16px;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  text-align:center;
 }
-
-.hidden{display:none}
-.screen{max-width:420px;margin:auto}
-
+.screen{
+  display:none;
+  min-height:100vh;
+  padding:24px;
+}
+.screen.active{display:block}
 .card{
-background:var(--card);
-border:1px solid var(--border);
-border-radius:22px;
-padding:22px;
-margin-top:16px;
+  background:var(--card);
+  border-radius:18px;
+  padding:24px;
+  max-width:420px;
+  margin:0 auto 18px;
 }
-
-h1{font-size:34px;font-weight:800;margin:0 0 8px}
-h2{font-size:18px;margin-bottom:14px}
-
-label{
-font-size:13px;
-color:var(--muted);
-display:block;
-margin-bottom:6px;
-}
-
-input,select{
-width:100%;
-background:#000;
-border:1px solid var(--border);
-border-radius:14px;
-padding:12px;
-color:var(--text);
-font-size:15px;
-margin-bottom:14px;
-}
-
+h1{font-size:36px;margin:20px 0}
+h2{margin-bottom:10px}
 button{
-width:100%;
-padding:14px;
-border-radius:16px;
-border:none;
-font-weight:700;
-background:var(--accent);
-color:#000;
-cursor:pointer;
+  background:var(--accent);
+  color:white;
+  border:none;
+  border-radius:14px;
+  padding:14px 22px;
+  font-size:16px;
+  margin:8px;
+  cursor:pointer;
 }
-
-button.secondary{
-background:#000;
-color:var(--text);
-border:1px solid var(--border);
-margin-top:10px;
+input,select{
+  width:100%;
+  padding:14px;
+  border-radius:12px;
+  border:none;
+  background:#1e1e23;
+  color:white;
+  margin-bottom:10px;
 }
-
 .grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:14px;
-margin-top:14px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
 }
-
 .tile{
-background:#000;
-border:1px solid var(--border);
-border-radius:18px;
-padding:40px 10px;
-font-weight:700;
-cursor:pointer;
+  background:#1e1e23;
+  padding:30px 10px;
+  border-radius:16px;
+  font-size:18px;
+  cursor:pointer;
 }
-
-.tile.used{opacity:0;pointer-events:none}
-
+.tile.used{opacity:.35;pointer-events:none}
 .overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.92);
-display:none;
-align-items:center;
-justify-content:center;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.85);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:10;
 }
-
 .overlay.show{display:flex}
-
-.modal{
-background:#000;
-border:1px solid var(--border);
-border-radius:22px;
-padding:26px;
-width:90%;
-max-width:360px;
-text-align:center;
-}
+.overlay .card{max-width:360px}
+.muted{color:var(--muted)}
 </style>
 </head>
 
 <body>
 
-<div class="screen">
-
-<div id="menu" class="card">
-<h1>Imposter</h1>
-<p style="color:var(--muted)">A social deduction game</p>
-<button onclick="goSetup()">Begin</button>
+<!-- MENU -->
+<div id="menu" class="screen active">
+  <h1>IMPOSTER</h1>
+  <div class="card">
+    <button onclick="goSetup()">Start Game</button>
+  </div>
 </div>
 
-<div id="setup" class="card hidden">
-<h2>Game Setup</h2>
+<!-- SETUP -->
+<div id="setup" class="screen">
+  <h2>Game Setup</h2>
+  <div class="card">
+    <label>Players</label>
+    <input id="playerCount" type="number" min="4" max="12" value="6">
 
-<label>Players</label>
-<input id="playerCount" type="number" min="4" max="12" value="6">
+    <label>Imposters</label>
+    <input id="imposterCount" type="number" min="1" max="3" value="1">
 
-<label>Imposters</label>
-<input id="imposterCount" type="number" min="1" max="3" value="1">
+    <label>Category</label>
+    <select id="category">
+      <option value="all">All</option>
+      <option value="sports">Sports</option>
+      <option value="animals">Animals</option>
+      <option value="food">Food</option>
+      <option value="locations">Locations</option>
+      <option value="objects">Objects</option>
+    </select>
 
-<label>Category</label>
-<select id="categorySelect">
-<option value="all">All</option>
-<option value="animals">Animals</option>
-<option value="food">Food</option>
-<option value="locations">Locations</option>
-<option value="objects">Objects</option>
-<option value="sports">Sports</option>
-</select>
+    <button onclick="buildNames()">Set Names</button>
+    <div id="names"></div>
 
-<div id="names"></div>
-
-<button onclick="startGame()">Start Game</button>
-<button class="secondary" onclick="goMenu()">Back</button>
+    <button onclick="startGame()">Begin</button>
+    <button onclick="backMenu()">Back</button>
+  </div>
 </div>
 
-<div id="game" class="card hidden">
-<p id="speaker"></p>
-<div id="grid" class="grid"></div>
-<button id="revealBtn" class="secondary hidden" onclick="showReveal()">Reveal</button>
-<button class="secondary" onclick="newRound()">Next Round</button>
+<!-- GAME -->
+<div id="game" class="screen">
+  <div class="card">
+    <h2 id="speaker"></h2>
+  </div>
+  <div id="grid" class="grid"></div>
+  <button id="revealBtn" onclick="showReveal()" style="display:none">Reveal</button>
 </div>
 
+<!-- ROLE -->
+<div id="roleOverlay" class="overlay">
+  <div class="card">
+    <h2 id="roleTitle"></h2>
+    <p id="roleText"></p>
+    <button onclick="closeRole()">Close</button>
+  </div>
 </div>
 
-<div id="overlay" class="overlay">
-<div class="modal">
-<h2 id="roleTitle"></h2>
-<p id="roleText"></p>
-<button onclick="closeOverlay()">OK</button>
-</div>
-</div>
-
-<div id="reveal" class="overlay">
-<div class="modal">
-<h2>Answer</h2>
-<p id="finalAnswer"></p>
-<p><b>Imposters</b></p>
-<p id="finalImposters"></p>
-<button onclick="closeReveal()">Done</button>
-</div>
+<!-- FINAL -->
+<div id="finalOverlay" class="overlay">
+  <div class="card">
+    <h2>Answer</h2>
+    <p id="finalWord"></p>
+    <p class="muted">Imposters:</p>
+    <p id="finalImposters"></p>
+    <button onclick="newRound()">Next Round</button>
+  </div>
 </div>
 
 <script>
-/* DOM */
-const menu = document.getElementById("menu");
-const setup = document.getElementById("setup");
-const game = document.getElementById("game");
-const namesDiv = document.getElementById("names");
-const grid = document.getElementById("grid");
-const overlay = document.getElementById("overlay");
-const reveal = document.getElementById("reveal");
-const speaker = document.getElementById("speaker");
-const revealBtn = document.getElementById("revealBtn");
+document.addEventListener("DOMContentLoaded",()=>{
 
-const playerCount = document.getElementById("playerCount");
-const imposterCount = document.getElementById("imposterCount");
-const categorySelect = document.getElementById("categorySelect");
-
-const roleTitle = document.getElementById("roleTitle");
-const roleText = document.getElementById("roleText");
-const finalAnswer = document.getElementById("finalAnswer");
-const finalImposters = document.getElementById("finalImposters");
-
-/* WORD DATA (200+) */
-const data = {
+const screens={menu,setup,game};
+const data={
+sports:[
+["LeBron James","longevity"],["Mahomes","sidearm"],["Brady","comebacks"],["Curry","range"],
+["Judge","power"],["Ohtani","two-way"],["Messi","vision"],["Ronaldo","aerial"],
+["Yankees","pinstripes"],["Lakers","banners"],["Cowboys","America"],["Patriots","dynasty"],
+["Red Sox","curse"],["Warriors","splashes"],["Packers","cheese"],["Heat","culture"]
+],
 animals:[
-["Dog","leash"],["Cat","whiskers"],["Horse","stable"],["Lion","mane"],
-["Tiger","stripes"],["Bear","den"],["Elephant","trunk"],["Giraffe","neck"],
-["Zebra","herd"],["Wolf","pack"],["Fox","sly"],["Deer","antlers"],
-["Rabbit","burrow"],["Kangaroo","pouch"],["Koala","eucalyptus"],
-["Penguin","waddle"],["Owl","nocturnal"],["Eagle","talons"],
-["Frog","lily"],["Snake","coil"],["Turtle","shell"],["Shark","fins"],
-["Dolphin","pod"],["Whale","blowhole"],["Octopus","ink"]
+["Dog","leash"],["Cat","whiskers"],["Lion","mane"],["Tiger","stripes"],["Bear","hibernate"],
+["Wolf","pack"],["Eagle","talons"],["Owl","nocturnal"],["Shark","fins"],["Whale","blowhole"],
+["Horse","saddle"],["Cow","pasture"],["Pig","snout"],["Goat","bleat"],["Deer","antlers"]
 ],
 food:[
-["Pizza","slice"],["Burger","stack"],["Pasta","twirl"],["Rice","grain"],
-["Bread","loaf"],["Soup","broth"],["Salad","toss"],["Taco","shell"],
-["Burrito","wrap"],["Sandwich","layers"],["Fries","basket"],
-["Donut","glaze"],["Bagel","hole"],["Pancake","flip"],
-["Waffle","grid"],["Ice Cream","scoop"],["Cake","frosting"],
-["Cookie","crumb"],["Brownie","fudge"],["Cereal","bowl"],
-["Sushi","roll"],["Ramen","noodles"],["Steak","sear"]
+["Pizza","slice"],["Burger","stack"],["Pasta","twirl"],["Rice","grain"],["Bread","crumb"],
+["Steak","sear"],["Soup","broth"],["Taco","fold"],["Sushi","roll"],["Cake","frosting"],
+["Eggs","yolk"],["Chicken","breast"],["Fries","salt"],["Salad","toss"],["Cheese","melt"]
 ],
 locations:[
-["Library","stacks"],["Airport","gate"],["Beach","shore"],
-["Forest","canopy"],["Mountain","ridge"],["Desert","dunes"],
-["City","grid"],["Village","square"],["School","hallway"],
-["Hospital","ward"],["Stadium","bleachers"],["Mall","atrium"],
-["Park","bench"],["Zoo","enclosure"],["Museum","exhibit"],
-["Church","pews"],["Theater","curtain"],["Garage","tools"]
+["Library","stacks"],["Airport","gate"],["Beach","tide"],["Hospital","ward"],["School","bell"],
+["Stadium","bleachers"],["Mall","escalator"],["Park","bench"],["Museum","exhibit"],
+["Church","pews"],["Gym","weights"],["Restaurant","menu"],["Hotel","lobby"],["Office","cubicle"]
 ],
 objects:[
-["Phone","screen"],["Keys","jingle"],["Backpack","zipper"],
-["Chair","legs"],["Table","edge"],["Clock","hands"],
-["Bottle","cap"],["Pen","click"],["Notebook","margin"],
-["Remote","buttons"],["Lamp","shade"],["Wallet","fold"],
-["Mirror","reflection"],["Shoes","laces"],["Watch","band"]
-],
-sports:[
-["LeBron James","longevity"],["Tom Brady","pocket"],
-["Patrick Mahomes","sidearm"],["Steph Curry","range"],
-["Shohei Ohtani","two-way"],["Messi","dribble"],
-["Ronaldo","airtime"],["Tiger Woods","fairway"],
-["Serena Williams","baseline"],["Aaron Judge","tower"],
-["Yankees","pinstripes"],["Lakers","gold"],
-["Warriors","splash"],["Patriots","dynasty"]
+["Phone","screen"],["Laptop","keyboard"],["Watch","wrist"],["Wallet","fold"],
+["Keys","jingle"],["Backpack","zipper"],["Bottle","cap"],["Chair","legs"],
+["Table","surface"],["Lamp","shade"],["Book","pages"],["Pen","ink"],
+["Shoes","laces"],["Hat","brim"],["Glasses","frames"]
 ]
 };
 
-let names=[],roles=[],current={},viewed=0;
+let names=[],roles=[],current,viewed=0;
 
-/* FLOW */
-function goSetup(){
-menu.classList.add("hidden");
-setup.classList.remove("hidden");
-buildNames();
+window.goSetup=()=>show("setup");
+window.backMenu=()=>show("menu");
+
+function show(id){
+  Object.values(screens).forEach(s=>s.classList.remove("active"));
+  screens[id].classList.add("active");
 }
 
-function goMenu(){
-setup.classList.add("hidden");
-menu.classList.remove("hidden");
-}
+window.buildNames=()=>{
+  namesDiv.innerHTML="";
+  for(let i=0;i<playerCount.value;i++){
+    const input=document.createElement("input");
+    input.placeholder="Player "+(i+1);
+    namesDiv.appendChild(input);
+  }
+};
 
-function buildNames(){
-namesDiv.innerHTML="";
-for(let i=0;i<playerCount.value;i++){
-const input=document.createElement("input");
-input.placeholder="Player "+(i+1);
-namesDiv.appendChild(input);
-}
-}
+window.startGame=()=>{
+  names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
+  show("game");
+  newRound();
+};
 
-function startGame(){
-names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||("Player "+(n+1
+window.newRound=()=>{
+  viewed=0;
+  revealBtn.style.display="none";
+  finalOverlay.classList.remove("show");
+
+  const pool=category.value==="all"?Object.values(data).flat():data[category.value];
+  current=pool[Math.floor(Math.random()*pool.length)];
+
+  roles=Array(names.length).fill("player");
+  for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++) roles[i]="imposter";
+  roles.sort(()=>Math.random()-.5);
+
+  speaker.textContent="First word: "+names[Math.floor(Math.random()*names.length)];
+
+  grid.innerHTML="";
+  names.forEach((n,i)=>{
+    const t=document.createElement("div");
+    t.className="tile";
+    t.textContent=n;
+    t.onclick=()=>{
+      showRole(i);
+      t.classList.add("used");
+      viewed++;
+      if(viewed===names.length) revealBtn.style.display="block";
+    };
+    grid.appendChild(t);
+  });
+};
+
+window.showRole=(i)=>{
+  roleOverlay.classList.add("show");
+  if(roles[i]==="imposter"){
+    roleTitle.textContent="IMPOSTER";
+    roleText.textContent="Category: "+category.value;
+  }else{
+    roleTitle.textContent=current[0];
+    roleText.textContent="Stay niche.";
+  }
+};
+
+window.closeRole=()=>roleOverlay.classList.remove("show");
+
+window.showReveal=()=>{
+  finalWord.textContent=current[0];
+  finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
+  finalOverlay.classList.add("show");
+};
+
+});
+</script>
+
+</body>
+</html>

@@ -3,87 +3,33 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Imposter</title>
-
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,
-<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'>
-<circle cx='50' cy='50' r='50' fill='%23000000'/>
-<circle cx='50' cy='38' r='14' fill='%23ffffff'/>
-<path d='M28 70c0-18 44-18 44 0v8H28z' fill='%23ffffff'/>
-<rect x='28' y='30' width='44' height='8' fill='%23000000'/>
-</svg>">
-
+<title>Imposter Game</title>
 <style>
 :root{
   --bg:#0b0b0d;
   --card:#141417;
-  --accent:#4f7cff;
-  --text:#f5f5f7;
+  --accent:#ffffff;
+  --text:#0b0b0d;
   --muted:#9a9aa1;
+  --imposter-bg:rgba(255,0,0,0.85);
 }
-*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto}
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--text);
-  text-align:center;
-}
-.screen{display:none;min-height:100vh;padding:24px}
-.screen.active{display:block}
-.card{
-  background:var(--card);
-  border-radius:18px;
-  padding:24px;
-  max-width:420px;
-  margin:0 auto 18px;
-}
-h1{font-size:36px;margin:20px 0}
-button{
-  background:var(--accent);
-  color:white;
-  border:none;
-  border-radius:14px;
-  padding:14px 22px;
-  font-size:16px;
-  margin:8px;
-  cursor:pointer;
-}
-input,select{
-  width:100%;
-  padding:14px;
-  border-radius:12px;
-  border:none;
-  background:#1e1e23;
-  color:white;
-  margin-bottom:10px;
-}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:12px;
-}
-.tile{
-  background:#1e1e23;
-  padding:30px 10px;
-  border-radius:16px;
-  font-size:18px;
-  cursor:pointer;
-}
-.tile.used{opacity:.35;pointer-events:none}
-.overlay{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.85);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index:10;
-}
-.overlay.show{display:flex}
-.muted{color:var(--muted)}
+*{box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto;}
+body{margin:0;background:var(--bg);color:var(--text);text-align:center;}
+.screen{display:none;min-height:100vh;padding:24px;}
+.screen.active{display:block;}
+.card{background:var(--card);border-radius:18px;padding:24px;max-width:420px;margin:0 auto 18px;}
+h1{font-size:36px;margin:20px 0;}
+button{background:var(--accent);color:var(--text);border:none;border-radius:14px;padding:14px 22px;font-size:16px;margin:8px;cursor:pointer;}
+input,select{width:100%;padding:14px;border-radius:12px;border:none;background:#1e1e23;color:white;margin-bottom:10px;}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+.tile{background:#ffffff;padding:30px 10px;border-radius:16px;font-size:18px;cursor:pointer;}
+.tile.used{opacity:.35;pointer-events:none;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:10;}
+.overlay.show{display:flex;}
+.overlay.imposter{background:var(--imposter-bg);}
+.muted{color:var(--muted);}
 </style>
 </head>
-
 <body>
 
 <!-- MENU -->
@@ -100,10 +46,8 @@ input,select{
   <div class="card">
     <label>Players</label>
     <input id="playerCount" type="number" min="4" max="12" value="6">
-
     <label>Imposters</label>
     <input id="imposterCount" type="number" min="1" max="3" value="1">
-
     <label>Category</label>
     <select id="category">
       <option value="all">All</option>
@@ -113,10 +57,8 @@ input,select{
       <option value="locations">Locations</option>
       <option value="objects">Objects</option>
     </select>
-
     <button id="namesBtn">Set Names</button>
     <div id="names"></div>
-
     <button id="beginBtn">Begin</button>
     <button id="backBtn">Back</button>
   </div>
@@ -131,7 +73,7 @@ input,select{
   <button id="revealBtn" style="display:none">Reveal</button>
 </div>
 
-<!-- ROLE -->
+<!-- ROLE OVERLAY -->
 <div id="roleOverlay" class="overlay">
   <div class="card">
     <h2 id="roleTitle"></h2>
@@ -140,7 +82,7 @@ input,select{
   </div>
 </div>
 
-<!-- FINAL -->
+<!-- FINAL REVEAL -->
 <div id="finalOverlay" class="overlay">
   <div class="card">
     <h2>Answer</h2>
@@ -154,7 +96,7 @@ input,select{
 <script>
 document.addEventListener("DOMContentLoaded",()=>{
 
-/* ELEMENTS */
+// Elements
 const menu=document.getElementById("menu");
 const setup=document.getElementById("setup");
 const game=document.getElementById("game");
@@ -162,40 +104,164 @@ const namesDiv=document.getElementById("names");
 const grid=document.getElementById("grid");
 const speaker=document.getElementById("speaker");
 const revealBtn=document.getElementById("revealBtn");
-
 const roleOverlay=document.getElementById("roleOverlay");
 const roleTitle=document.getElementById("roleTitle");
 const roleText=document.getElementById("roleText");
-
 const finalOverlay=document.getElementById("finalOverlay");
 const finalWord=document.getElementById("finalWord");
 const finalImposters=document.getElementById("finalImposters");
-
 const playerCount=document.getElementById("playerCount");
 const imposterCount=document.getElementById("imposterCount");
 const category=document.getElementById("category");
 
-/* DATA (unchanged categories structure – expandable) */
-const data={
-sports:[["LeBron James","longevity"],["Mahomes","sidearm"],["Curry","range"],["Judge","power"]],
-animals:[["Dog","leash"],["Cat","whiskers"],["Lion","mane"],["Shark","fins"]],
-food:[["Pizza","slice"],["Burger","stack"],["Sushi","roll"],["Pasta","twirl"]],
-locations:[["Library","stacks"],["Airport","gate"],["Beach","tide"],["Hospital","ward"]],
-objects:[["Phone","screen"],["Keys","jingle"],["Wallet","fold"],["Watch","wrist"]]
-};
+// Word data (~300 words)
+const data=[
+/* SPORTS PLAYERS & TEAMS */
+{word:"LeBron James", hint:"longevity", category:"sports"},
+{word:"Stephen Curry", hint:"range", category:"sports"},
+{word:"Kevin Durant", hint:"silky", category:"sports"},
+{word:"Giannis Antetokounmpo", hint:"stride", category:"sports"},
+{word:"Luka Doncic", hint:"pivot", category:"sports"},
+{word:"Joel Embiid", hint:"post", category:"sports"},
+{word:"Anthony Davis", hint:"block", category:"sports"},
+{word:"Kawhi Leonard", hint:"claw", category:"sports"},
+{word:"James Harden", hint:"stepback", category:"sports"},
+{word:"Nikola Jokic", hint:"vision", category:"sports"},
+{word:"Patrick Mahomes", hint:"sidearm", category:"sports"},
+{word:"Tom Brady", hint:"pocket", category:"sports"},
+{word:"Aaron Rodgers", hint:"launch", category:"sports"},
+{word:"Josh Allen", hint:"arm", category:"sports"},
+{word:"Joe Burrow", hint:"clutch", category:"sports"},
+{word:"Dak Prescott", hint:"sideline", category:"sports"},
+{word:"Derrick Henry", hint:"power", category:"sports"},
+{word:"Nick Chubb", hint:"run", category:"sports"},
+{word:"Shohei Ohtani", hint:"two-way", category:"sports"},
+{word:"Aaron Judge", hint:"tower", category:"sports"},
+{word:"Mike Trout", hint:"all-around", category:"sports"},
+{word:"Mookie Betts", hint:"speed", category:"sports"},
+{word:"Yankees", hint:"pinstripes", category:"sports"},
+{word:"Red Sox", hint:"curse", category:"sports"},
+{word:"Dodgers", hint:"blue", category:"sports"},
+{word:"Cubs", hint:"ivy", category:"sports"},
+{word:"Lakers", hint:"gold", category:"sports"},
+{word:"Warriors", hint:"splash", category:"sports"},
+{word:"Packers", hint:"cheese", category:"sports"},
+{word:"Patriots", hint:"dynasty", category:"sports"},
+// ANIMALS
+{word:"Dog", hint:"leash", category:"animals"},
+{word:"Cat", hint:"whiskers", category:"animals"},
+{word:"Lion", hint:"mane", category:"animals"},
+{word:"Tiger", hint:"stripes", category:"animals"},
+{word:"Bear", hint:"hibernate", category:"animals"},
+{word:"Wolf", hint:"pack", category:"animals"},
+{word:"Fox", hint:"sly", category:"animals"},
+{word:"Deer", hint:"antlers", category:"animals"},
+{word:"Rabbit", hint:"burrow", category:"animals"},
+{word:"Kangaroo", hint:"pouch", category:"animals"},
+{word:"Koala", hint:"eucalyptus", category:"animals"},
+{word:"Penguin", hint:"waddle", category:"animals"},
+{word:"Owl", hint:"nocturnal", category:"animals"},
+{word:"Eagle", hint:"talons", category:"animals"},
+{word:"Frog", hint:"lily", category:"animals"},
+{word:"Snake", hint:"coil", category:"animals"},
+{word:"Turtle", hint:"shell", category:"animals"},
+{word:"Shark", hint:"fins", category:"animals"},
+{word:"Dolphin", hint:"pod", category:"animals"},
+{word:"Whale", hint:"blowhole", category:"animals"},
+{word:"Octopus", hint:"ink", category:"animals"},
+{word:"Horse", hint:"saddle", category:"animals"},
+{word:"Cow", hint:"pasture", category:"animals"},
+{word:"Pig", hint:"snout", category:"animals"},
+{word:"Goat", hint:"bleat", category:"animals"},
+// FOOD
+{word:"Pizza", hint:"slice", category:"food"},
+{word:"Burger", hint:"stack", category:"food"},
+{word:"Pasta", hint:"twirl", category:"food"},
+{word:"Rice", hint:"grain", category:"food"},
+{word:"Bread", hint:"loaf", category:"food"},
+{word:"Soup", hint:"broth", category:"food"},
+{word:"Salad", hint:"toss", category:"food"},
+{word:"Taco", hint:"shell", category:"food"},
+{word:"Burrito", hint:"wrap", category:"food"},
+{word:"Sandwich", hint:"layers", category:"food"},
+{word:"Fries", hint:"basket", category:"food"},
+{word:"Donut", hint:"glaze", category:"food"},
+{word:"Bagel", hint:"hole", category:"food"},
+{word:"Pancake", hint:"flip", category:"food"},
+{word:"Waffle", hint:"grid", category:"food"},
+{word:"Ice Cream", hint:"scoop", category:"food"},
+{word:"Cake", hint:"frosting", category:"food"},
+{word:"Cookie", hint:"crumb", category:"food"},
+{word:"Brownie", hint:"fudge", category:"food"},
+{word:"Cereal", hint:"bowl", category:"food"},
+{word:"Sushi", hint:"roll", category:"food"},
+{word:"Ramen", hint:"noodles", category:"food"},
+{word:"Steak", hint:"sear", category:"food"},
+{word:"Eggs", hint:"yolk", category:"food"},
+{word:"Chicken", hint:"breast", category:"food"},
+{word:"Cheese", hint:"melt", category:"food"},
+{word:"Apple", hint:"core", category:"food"},
+{word:"Banana", hint:"peel", category:"food"},
+{word:"Carrot", hint:"root", category:"food"},
+{word:"Corn", hint:"kernel", category:"food"},
+// LOCATIONS
+{word:"Library", hint:"stacks", category:"locations"},
+{word:"Airport", hint:"gate", category:"locations"},
+{word:"Beach", hint:"shore", category:"locations"},
+{word:"Forest", hint:"canopy", category:"locations"},
+{word:"Mountain", hint:"ridge", category:"locations"},
+{word:"Desert", hint:"dunes", category:"locations"},
+{word:"City", hint:"grid", category:"locations"},
+{word:"Village", hint:"square", category:"locations"},
+{word:"School", hint:"hallway", category:"locations"},
+{word:"Hospital", hint:"ward", category:"locations"},
+{word:"Stadium", hint:"bleachers", category:"locations"},
+{word:"Mall", hint:"atrium", category:"locations"},
+{word:"Park", hint:"bench", category:"locations"},
+{word:"Zoo", hint:"enclosure", category:"locations"},
+{word:"Museum", hint:"exhibit", category:"locations"},
+{word:"Church", hint:"pews", category:"locations"},
+{word:"Theater", hint:"curtain", category:"locations"},
+{word:"Garage", hint:"tools", category:"locations"},
+{word:"Hotel", hint:"lobby", category:"locations"},
+{word:"Office", hint:"cubicle", category:"locations"},
+{word:"Restaurant", hint:"menu", category:"locations"},
+{word:"Gym", hint:"weights", category:"locations"},
+{word:"Train Station", hint:"platform", category:"locations"},
+{word:"Harbor", hint:"dock", category:"locations"},
+{word:"Playground", hint:"swing", category:"locations"},
+// OBJECTS
+{word:"Phone", hint:"screen", category:"objects"},
+{word:"Keys", hint:"jingle", category:"objects"},
+{word:"Backpack", hint:"zipper", category:"objects"},
+{word:"Chair", hint:"legs", category:"objects"},
+{word:"Table", hint:"edge", category:"objects"},
+{word:"Clock", hint:"hands", category:"objects"},
+{word:"Bottle", hint:"cap", category:"objects"},
+{word:"Pen", hint:"click", category:"objects"},
+{word:"Notebook", hint:"margin", category:"objects"},
+{word:"Remote", hint:"buttons", category:"objects"},
+{word:"Lamp", hint:"shade", category:"objects"},
+{word:"Wallet", hint:"fold", category:"objects"},
+{word:"Mirror", hint:"reflection", category:"objects"},
+{word:"Shoes", hint:"laces", category:"objects"},
+{word:"Watch", hint:"band", category:"objects"},
+{word:"Glasses", hint:"frames", category:"objects"},
+{word:"Hat", hint:"brim", category:"objects"},
+{word:"Book", hint:"pages", category:"objects"},
+{word:"Bag", hint:"strap", category:"objects"},
+{word:"Umbrella", hint:"handle", category:"objects"}
+];
 
-let names=[],roles=[],current,viewed=0;
+// Game variables
+let names=[], roles=[], current, viewed=0;
 
-/* NAV */
-const show=s=>{
-  [menu,setup,game].forEach(x=>x.classList.remove("active"));
-  s.classList.add("active");
-};
+// NAV
+function showScreen(screen){ [menu,setup,game].forEach(x=>x.classList.remove("active")); screen.classList.add("active"); }
+document.getElementById("startBtn").onclick=()=>showScreen(setup);
+document.getElementById("backBtn").onclick=()=>showScreen(menu);
 
-/* BUTTONS */
-document.getElementById("startBtn").onclick=()=>show(setup);
-document.getElementById("backBtn").onclick=()=>show(menu);
-
+// Names setup
 document.getElementById("namesBtn").onclick=()=>{
   namesDiv.innerHTML="";
   for(let i=0;i<playerCount.value;i++){
@@ -205,43 +271,36 @@ document.getElementById("namesBtn").onclick=()=>{
   }
 };
 
+// Start round
 document.getElementById("beginBtn").onclick=()=>{
   names=[...namesDiv.querySelectorAll("input")].map((i,n)=>i.value||`Player ${n+1}`);
   startRound();
 };
-
 document.getElementById("closeRole").onclick=()=>roleOverlay.classList.remove("show");
 document.getElementById("revealBtn").onclick=showReveal;
 document.getElementById("nextRound").onclick=startRound;
 
-/* GAME */
 function startRound(){
-  viewed=0;
-  revealBtn.style.display="none";
-  finalOverlay.classList.remove("show");
-  show(game);
-
-  const pool=category.value==="all"?Object.values(data).flat():data[category.value];
+  viewed=0; revealBtn.style.display="none"; finalOverlay.classList.remove("show"); showScreen(game);
+  let pool=category.value==="all"?data:data.filter(d=>d.category===category.value);
   current=pool[Math.floor(Math.random()*pool.length)];
-
   roles=Array(names.length).fill("player");
   for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++) roles[i]="imposter";
   roles.sort(()=>Math.random()-.5);
-
   speaker.textContent="First word: "+names[Math.floor(Math.random()*names.length)];
-
   grid.innerHTML="";
   names.forEach((n,i)=>{
     const t=document.createElement("div");
-    t.className="tile";
-    t.textContent=n;
+    t.className="tile"; t.textContent=n;
     t.onclick=()=>{
       roleOverlay.classList.add("show");
       if(roles[i]==="imposter"){
+        roleOverlay.classList.add("imposter");
         roleTitle.textContent="IMPOSTER";
-        roleText.textContent="Category: "+category.value;
-      }else{
-        roleTitle.textContent=current[0];
+        roleText.textContent="Hint: "+current.hint+" | Category: "+current.category;
+      } else {
+        roleOverlay.classList.remove("imposter");
+        roleTitle.textContent=current.word;
         roleText.textContent="Stay niche.";
       }
       t.classList.add("used");
@@ -253,13 +312,10 @@ function startRound(){
 }
 
 function showReveal(){
-  finalWord.textContent=current[0];
+  finalWord.textContent=current.word;
   finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
   finalOverlay.classList.add("show");
 }
-
-});
 </script>
-
 </body>
 </html>

@@ -363,7 +363,8 @@ label{
         <option value="entertainment">Entertainment</option>
         <option value="professions">Professions</option>
       </select>
-      <div style="margin:20px 0;text-align:left">
+      <button id="settingsToggleBtn" class="secondary" style="width:100%;margin:16px 0">Game Settings</button>
+      <div id="settingsPanel" style="display:none;margin:20px 0;text-align:left;padding:16px;background:var(--card-light);border-radius:16px">
         <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
           <input type="checkbox" id="showCategory" checked style="width:auto;margin:0 10px 0 0">
           <span style="font-size:14px;text-transform:none;letter-spacing:0">Show category to imposters</span>
@@ -372,9 +373,21 @@ label{
           <input type="checkbox" id="showHint" checked style="width:auto;margin:0 10px 0 0">
           <span style="font-size:14px;text-transform:none;letter-spacing:0">Give hint to imposters</span>
         </label>
-        <label style="display:flex;align-items:center;cursor:pointer">
+        <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
           <input type="checkbox" id="impostersKnowEachOther" style="width:auto;margin:0 10px 0 0">
-          <span style="font-size:14px;text-transform:none;letter-spacing:0">Imposters know each other</span>
+          <span style="font-size:14px;text-transform:none;letter-spacing:0">Imposters know each other (2+ imposters)</span>
+        </label>
+        <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
+          <input type="checkbox" id="randomSpeaker" checked style="width:auto;margin:0 10px 0 0">
+          <span style="font-size:14px;text-transform:none;letter-spacing:0">Random first speaker</span>
+        </label>
+        <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
+          <input type="checkbox" id="hardMode" style="width:auto;margin:0 10px 0 0">
+          <span style="font-size:14px;text-transform:none;letter-spacing:0">Hard mode (no category or hint)</span>
+        </label>
+        <label style="display:flex;align-items:center;cursor:pointer">
+          <input type="checkbox" id="showWordCount" style="width:auto;margin:0 10px 0 0">
+          <span style="font-size:14px;text-transform:none;letter-spacing:0">Show word length to imposters</span>
         </label>
       </div>
       <button id="namesBtn">Set Player Names</button>
@@ -632,6 +645,35 @@ professions:[
   ["Arborist","tree"],["Beekeeper","suit"],["Rancher","cowboy"],
   ["Veterinary Technician","clinic"],["Zookeeper","animals"],["Marine Biologist","ocean"],
   ["Paleontologist","fossils"],["Archaeologist","dig"],["Anthropologist","culture"]
+],
+professions:[
+  ["Doctor","residency"],["Nurse","rounds"],["Teacher","curriculum"],
+  ["Chef","brigade"],["Waiter","section"],["Pilot","logbook"],
+  ["Flight Attendant","jumpseat"],["Driver","CDL"],["Mechanic","diagnostic"],
+  ["Plumber","soldering"],["Electrician","breaker"],["Carpenter","joinery"],
+  ["Painter","primer"],["Firefighter","apparatus"],["Police Officer","precinct"],
+  ["Soldier","drill"],["Lawyer","brief"],["Judge","chambers"],
+  ["Cashier","drawer"],["Barista","grind"],["Bartender","muddler"],
+  ["Photographer","bokeh"],["Musician","gig"],["Singer","vibrato"],
+  ["Actor","callback"],["Dancer","barre"],["Artist","medium"],
+  ["Writer","revision"],["Journalist","byline"],["Scientist","control"],
+  ["Accountant","ledger"],["Banker","interest"],["Architect","elevation"],
+  ["Engineer","tolerance"],["Programmer","syntax"],["Designer","kerning"],
+  ["Dentist","crown"],["Veterinarian","scrubs"],["Pharmacist","compounding"],
+  ["Librarian","circulation"],["Secretary","memorandum"],["Receptionist","directory"],
+  ["Mail Carrier","satchel"],["Delivery Driver","manifest"],["Truck Driver","logbook"],
+  ["Construction Worker","permit"],["Janitor","custodial"],["Security Guard","shift"],
+  ["Lifeguard","certification"],["Personal Trainer","certification"],["Coach","clipboard"],
+  ["Referee","whistle"],["Umpire","indicator"],["Athlete","draft"],
+  ["Model","portfolio"],["Makeup Artist","contour"],["Hair Stylist","sectioning"],
+  ["Tailor","alterations"],["Cobbler","resoling"],["Jeweler","setting"],
+  ["Butcher","cleaver"],["Baker","proofing"],["Pastry Chef","piping"],
+  ["Sommelier","vintage"],["Mixologist","bitters"],["Barback","stock"],
+  ["Dishwasher","sanitizer"],["Line Cook","mise"],["Sous Chef","expedite"],
+  ["Florist","arrangement"],["Gardener","mulch"],["Landscaper","irrigation"],
+  ["Arborist","pruning"],["Beekeeper","smoker"],["Rancher","branding"],
+  ["Veterinary Technician","restraint"],["Zookeeper","enrichment"],["Marine Biologist","dive"],
+  ["Paleontologist","excavation"],["Archaeologist","stratigraphy"],["Anthropologist","fieldwork"]
 ]
 };
 const categoryNames={
@@ -669,6 +711,10 @@ document.getElementById("settingsBtn").onclick=()=>{
   show(setup);
   document.getElementById("settingsBtn").style.display="none";
 };
+document.getElementById("settingsToggleBtn").onclick=()=>{
+  const panel=document.getElementById("settingsPanel");
+  panel.style.display=panel.style.display==="none"?"block":"none";
+};
 document.getElementById("menuBtn").onclick=()=>{
   finalOverlay.classList.remove("show");
   show(menu);
@@ -693,11 +739,21 @@ function startRound(){
   for(let i=0;i<Math.min(imposterCount.value,names.length-1);i++) roles[i]="imposter";
   roles.sort(()=>Math.random()-.5);
   imposterNames=names.filter((_,i)=>roles[i]==="imposter");
-  speaker.textContent=names[Math.floor(Math.random()*names.length)];
+  
+  const randomSpeaker=document.getElementById("randomSpeaker").checked;
+  if(randomSpeaker){
+    speaker.textContent=names[Math.floor(Math.random()*names.length)];
+  }else{
+    speaker.textContent=names[0];
+  }
+  
   grid.innerHTML="";
-  const showCat=document.getElementById("showCategory").checked;
-  const showHintVal=document.getElementById("showHint").checked;
+  const hardMode=document.getElementById("hardMode").checked;
+  const showCat=hardMode?false:document.getElementById("showCategory").checked;
+  const showHintVal=hardMode?false:document.getElementById("showHint").checked;
   const knowEachOther=document.getElementById("impostersKnowEachOther").checked;
+  const showWordLength=document.getElementById("showWordCount").checked;
+  
   names.forEach((n,i)=>{
     const t=document.createElement("div");
     t.className="tile";
@@ -715,6 +771,9 @@ function startRound(){
         }
         if(showHintVal){
           content+=`<p style="font-size:18px;margin-top:12px;font-weight:600;color:var(--text-muted)">Hint: "${current[1]}"</p>`;
+        }
+        if(showWordLength){
+          content+=`<p style="font-size:16px;margin-top:12px;font-weight:600;color:var(--text-muted)">Word Length: ${current[0].length} letters</p>`;
         }
         if(knowEachOther && imposterNames.length>1){
           const otherImposters=imposterNames.filter(name=>name!==n).join(", ");

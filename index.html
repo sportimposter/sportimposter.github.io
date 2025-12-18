@@ -340,6 +340,41 @@ label{
 @keyframes confettiFall{
   to{transform:translateY(100vh) rotate(360deg);opacity:0}
 }
+.badge{
+  display:inline-block;
+  padding:6px 12px;
+  background:var(--card-light);
+  border:1px solid var(--border);
+  border-radius:12px;
+  font-size:13px;
+  font-weight:600;
+  transition:all .3s ease;
+}
+.badge.checked{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:white;
+  transform:scale(1.05);
+}
+.typing-indicator{
+  display:inline-flex;
+  gap:4px;
+  align-items:center;
+}
+.typing-indicator span{
+  width:6px;
+  height:6px;
+  background:var(--text-muted);
+  border-radius:50%;
+  animation:typingBounce 1.4s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(1){animation-delay:0s}
+.typing-indicator span:nth-child(2){animation-delay:0.2s}
+.typing-indicator span:nth-child(3){animation-delay:0.4s}
+@keyframes typingBounce{
+  0%,60%,100%{transform:translateY(0)}
+  30%{transform:translateY(-10px)}
+}
 .final-word{
   font-size:clamp(36px,8vw,48px);
   font-weight:800;
@@ -442,13 +477,14 @@ label{
       <h2 id="speaker"></h2>
     </div>
     <div style="margin-bottom:16px;padding:16px;background:var(--card);border-radius:16px;border:1px solid var(--border)">
-      <p style="font-size:14px;color:var(--text-muted);margin-bottom:8px">Progress</p>
-      <div style="display:flex;align-items:center;gap:12px">
-        <div style="flex:1;height:8px;background:var(--card-light);border-radius:8px;overflow:hidden">
-          <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent),#a855f7);width:0%;transition:width .3s ease"></div>
-        </div>
-        <p style="font-size:16px;font-weight:700;min-width:60px;text-align:right"><span id="progressText">0/0</span></p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <p style="font-size:14px;color:var(--text-muted)">Progress</p>
+        <p style="font-size:16px;font-weight:700"><span id="progressText">0/0</span></p>
       </div>
+      <div style="height:8px;background:var(--card-light);border-radius:8px;overflow:hidden">
+        <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent),#a855f7);width:0%;transition:width .3s ease"></div>
+      </div>
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap" id="playerBadges"></div>
     </div>
     <div id="grid" class="grid"></div>
     <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -467,15 +503,20 @@ label{
 <!-- FINAL -->
 <div id="finalOverlay" class="overlay">
   <div class="card">
-    <h2>Game Over</h2>
+    <h2>🎭 Game Over</h2>
     <p class="muted">The word was:</p>
     <p class="final-word" id="finalWord"></p>
     <p class="muted" style="margin-top:24px">The Imposters were:</p>
-    <p id="finalImposters" style="font-size:22px;font-weight:700;margin-top:12px"></p>
+    <p id="finalImposters" style="font-size:22px;font-weight:700;margin-top:12px;color:var(--danger)"></p>
     <div style="margin-top:32px;padding:20px;background:var(--card-light);border-radius:16px">
-      <p class="muted" style="margin-bottom:12px;font-size:14px">Round Summary</p>
+      <p class="muted" style="margin-bottom:12px;font-size:14px">📊 Round Summary</p>
       <p style="font-size:18px;font-weight:600;margin-bottom:8px">Category: <span id="finalCategory"></span></p>
       <p style="font-size:16px;color:var(--text-muted)">Hint: "<span id="finalHint"></span>"</p>
+      <p style="font-size:14px;color:var(--text-muted);margin-top:12px" id="finalStats"></p>
+    </div>
+    <div style="margin-top:24px;padding:16px;background:var(--card-light);border-radius:16px;border:1px solid var(--border)">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:8px">💡 Pro Tip</p>
+      <p id="proTip" style="font-size:14px;line-height:1.6"></p>
     </div>
     <button id="nextRound">Play Again</button>
     <button id="menuBtn" class="secondary">Main Menu</button>

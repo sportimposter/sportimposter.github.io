@@ -370,7 +370,7 @@ label{
         <option value="entertainment">Entertainment</option>
         <option value="professions">Professions</option>
       </select>
-      <button id="settingsToggleBtn" class="secondary" style="width:100%;margin:16px 0">Game Settings</button>
+      <button id="settingsToggleBtn" class="secondary" style="width:100%;margin:16px 0">⚙️ Game Settings</button>
       <div id="settingsPanel" style="display:none;margin:20px 0;text-align:left;padding:16px;background:var(--card-light);border-radius:16px">
         <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
           <input type="checkbox" id="showCategory" checked style="width:auto;margin:0 10px 0 0">
@@ -392,9 +392,13 @@ label{
           <input type="checkbox" id="hardMode" style="width:auto;margin:0 10px 0 0">
           <span style="font-size:14px;text-transform:none;letter-spacing:0">Hard mode (no category or hint)</span>
         </label>
-        <label style="display:flex;align-items:center;cursor:pointer">
+        <label style="display:flex;align-items:center;cursor:pointer;margin-bottom:12px">
           <input type="checkbox" id="showWordCount" style="width:auto;margin:0 10px 0 0">
           <span style="font-size:14px;text-transform:none;letter-spacing:0">Show word length to imposters</span>
+        </label>
+        <label style="display:flex;align-items:center;cursor:pointer">
+          <input type="checkbox" id="soundEffects" checked style="width:auto;margin:0 10px 0 0">
+          <span style="font-size:14px;text-transform:none;letter-spacing:0">Sound effects</span>
         </label>
       </div>
       <button id="namesBtn">Set Player Names</button>
@@ -410,6 +414,15 @@ label{
     <div class="speaker-card">
       <h3>First Speaker</h3>
       <h2 id="speaker"></h2>
+    </div>
+    <div style="margin-bottom:16px;padding:16px;background:var(--card);border-radius:16px;border:1px solid var(--border)">
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:8px">Progress</p>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="flex:1;height:8px;background:var(--card-light);border-radius:8px;overflow:hidden">
+          <div id="progressBar" style="height:100%;background:linear-gradient(90deg,var(--accent),#a855f7);width:0%;transition:width .3s ease"></div>
+        </div>
+        <p style="font-size:16px;font-weight:700;min-width:60px;text-align:right"><span id="progressText">0/0</span></p>
+      </div>
     </div>
     <div id="grid" class="grid"></div>
     <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -698,6 +711,20 @@ const categoryNames={
   professions:"Professions"
 };
 let names=[],roles=[],current,currentCategory,viewed=0,imposterNames=[];
+const audioContext=new (window.AudioContext||window.webkitAudioContext)();
+function playSound(frequency,duration,type='sine'){
+  if(!document.getElementById("soundEffects").checked) return;
+  const osc=audioContext.createOscillator();
+  const gain=audioContext.createGain();
+  osc.connect(gain);
+  gain.connect(audioContext.destination);
+  osc.frequency.value=frequency;
+  osc.type=type;
+  gain.gain.setValueAtTime(0.1,audioContext.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.01,audioContext.currentTime+duration);
+  osc.start(audioContext.currentTime);
+  osc.stop(audioContext.currentTime+duration);
+}
 const show=s=>{
   [menu,setup,game].forEach(x=>x.classList.remove("active"));
   s.classList.add("active");

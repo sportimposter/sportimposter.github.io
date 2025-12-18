@@ -225,6 +225,13 @@ label{
   background:var(--card-light);
   transform:scale(.97);
 }
+.tile.pulsing{
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.05)}
+}
 .overlay{
   position:fixed;
   inset:0;
@@ -426,6 +433,11 @@ label{
     <p class="final-word" id="finalWord"></p>
     <p class="muted" style="margin-top:24px">The Imposters were:</p>
     <p id="finalImposters" style="font-size:22px;font-weight:700;margin-top:12px"></p>
+    <div style="margin-top:32px;padding:20px;background:var(--card-light);border-radius:16px">
+      <p class="muted" style="margin-bottom:12px;font-size:14px">Round Summary</p>
+      <p style="font-size:18px;font-weight:600;margin-bottom:8px">Category: <span id="finalCategory"></span></p>
+      <p style="font-size:16px;color:var(--text-muted)">Hint: "<span id="finalHint"></span>"</p>
+    </div>
     <button id="nextRound">Play Again</button>
     <button id="menuBtn" class="secondary">Main Menu</button>
   </div>
@@ -713,7 +725,11 @@ document.getElementById("settingsBtn").onclick=()=>{
 };
 document.getElementById("settingsToggleBtn").onclick=()=>{
   const panel=document.getElementById("settingsPanel");
-  panel.style.display=panel.style.display==="none"?"block":"none";
+  if(panel.style.display==="none"){
+    panel.style.display="block";
+  }else{
+    panel.style.display="none";
+  }
 };
 document.getElementById("menuBtn").onclick=()=>{
   finalOverlay.classList.remove("show");
@@ -758,8 +774,18 @@ function startRound(){
     const t=document.createElement("div");
     t.className="tile";
     t.innerHTML=`<span>${n}</span>`;
+    
+    // Add pulsing animation to unused tiles
+    setTimeout(()=>{
+      if(!t.classList.contains("used")){
+        t.classList.add("pulsing");
+      }
+    },500);
+    
     const showRole=()=>{
       if(t.classList.contains("used")) return;
+      t.classList.remove("pulsing");
+      
       if(roles[i]==="imposter"){
         roleOverlay.style.background="rgba(239,68,68,.15)";
         roleOverlay.style.backdropFilter="blur(12px)";
@@ -809,6 +835,8 @@ function startRound(){
 }
 function showReveal(){
   finalWord.textContent=current[0];
+  document.getElementById("finalCategory").textContent=categoryNames[currentCategory];
+  document.getElementById("finalHint").textContent=current[1];
   finalImposters.textContent=names.filter((_,i)=>roles[i]==="imposter").join(", ");
   finalOverlay.classList.add("show");
 }
